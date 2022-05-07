@@ -1,0 +1,75 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "esnext", //모듈 코드 생성 지정
+    "moduleResolution": "node", //모듈 해석 방법 결정
+    "lib": [
+      "ES5",
+      "ES6",
+      "ESNext",
+      "DOM"
+    ],
+    "baseUrl": "./src",
+    "jsx": "react-jsx",
+    "jsxImportSource": "@emotion/react",
+    "strict": true,
+    "resolveJsonModule": true, // json파일 import 허용
+    "isolatedModules": false, // ts파일 빈값 불가
+    "esModuleInterop": true, // default imports 허용여부
+    "allowSyntheticDefaultImports": true, //default export가 없는 모듈에서 default imports를 허용
+    /* 소스 맵 옵션 */
+    "sourceMap": true, // .map 파일 생성
+    /* 추가적 옵션 */
+    "forceConsistentCasingInFileNames": true, // 같은 파일에 대한 일관되지 않은 참조 허용 여부 
+    "skipLibCheck": true, /* 정의 파일의 타입 확인을 건너 뛸 지 여부 */
+    //"keyofStringsOnly": true, // keyof를 문자열 값으로 된 프로퍼티 이름에만 적용
+    //"noImplicitAny": false, // 엄격한 타입 검사 옵션 비활성
+    "removeComments": false, // 주석제거
+    //"noResolve": false, // 컴파일 파일 목록 트리플-슬래시 참조 또는 모듈 임포트 대상을 추가하지않음
+    "noFallthroughCasesInSwitch": true, // switch문제서 fallthrough를 잡아줌
+    /////////// log ///////////
+    "pretty": true, // 에러 메시지를 예쁘게 설정
+    "plugins": [
+      {
+        "name": "typescript-styled-plugin",
+        "tags": [
+          "styled",
+          "css"
+        ]
+      }
+    ],
+    "paths": {
+      "@src/*": [
+        "./*"
+      ],
+      "@types/*": [
+        "./@types/*"
+      ],
+      "@store/*": [
+        "./store/*"
+      ],
+      "@components/*": [
+        "./components/*"
+      ],
+      "@features/*": [
+        "./features/*"
+      ],
+      "@pages/*": [
+        "./pages/*"
+      ],
+      "@layout/*": [
+        "./layout/*"
+      ],
+      "@utils/*": [
+        "./utils/*"
+      ],
+      "@assets/*": [
+        "./assets/*"
+      ],
+    }
+  },
+  "include": [
+    "src/**/*",
+    "@types/*",
+  ]
+}
