@@ -2,19 +2,9 @@ import styled from '@emotion/styled';
 import useSocketIo from '@src/hooks/socketIo/useSocketIo';
 import { useEffect, useState } from 'react';
 
-export function LoginPage() {
-  const { socket, createNewSocket } = useSocketIo();
+export function LoginPage({ socket }: any) {
   const [nickName, setNickName] = useState('');
-
-  const initSocket = () => {
-    createNewSocket();
-    if (!socket) return false;
-    socket.on('connect', () => console.log('Connected'));
-  };
-
-  useEffect(() => {
-    initSocket();
-  }, []);
+  const [error, setError] = useState<boolean>(false);
 
   interface isUserCallback {
     user: {
@@ -25,7 +15,9 @@ export function LoginPage() {
   }
 
   const isUserCallback = ({ user, isUser }: isUserCallback) => {
+    console.log('test????????');
     if (isUser) {
+      setError(true);
       return console.error('Already nickname');
     } else {
       console.log('===========isUserCallback===========');
@@ -41,10 +33,12 @@ export function LoginPage() {
   };
 
   const handleClickLoginSubmit = async () => {
-    if (!socket) return;
+    if (!socket.current) return false;
     console.log('handleClickLoginSubmit');
-    socket.emit('IS_USER', nickName, isUserCallback);
+    socket.current.emit('IS_USER', nickName, isUserCallback);
   };
+
+  console.log(socket);
 
   return (
     <LoginPageStyled>
