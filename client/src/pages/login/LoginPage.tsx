@@ -1,8 +1,7 @@
 import styled from '@emotion/styled';
-import useSocketIo from '@src/hooks/socketIo/useSocketIo';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
-export function LoginPage({ socket }: any) {
+export function LoginPage({ socket, setUser }: any) {
   const [nickName, setNickName] = useState('');
   const [error, setError] = useState<boolean>(false);
 
@@ -15,14 +14,11 @@ export function LoginPage({ socket }: any) {
   }
 
   const isUserCallback = ({ user, isUser }: isUserCallback) => {
-    console.log('test????????');
     if (isUser) {
       setError(true);
       return console.error('Already nickname');
     } else {
-      console.log('===========isUserCallback===========');
-      console.log(user);
-      console.log(isUser);
+      setUser(user);
     }
   };
 
@@ -34,16 +30,14 @@ export function LoginPage({ socket }: any) {
 
   const handleClickLoginSubmit = async () => {
     if (!socket.current) return false;
-    console.log('handleClickLoginSubmit');
     socket.current.emit('IS_USER', nickName, isUserCallback);
   };
-
-  console.log(socket);
 
   return (
     <LoginPageStyled>
       <input type="text" onChange={handleChange} />
       <button onClick={handleClickLoginSubmit}>버튼</button>
+      {error && <div>닉네임이 중복입니다.</div>}
     </LoginPageStyled>
   );
 }

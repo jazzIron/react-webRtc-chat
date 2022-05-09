@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import useSocketIo from '@src/hooks/socketIo/useSocketIo';
-import { Socket } from 'dgram';
-import { useEffect, useRef, useState } from 'react';
+import events from 'events';
+import { useEffect, useState } from 'react';
 import { ChatPage } from '../chat/ChatPage';
 import { LoginPage } from '../login/LoginPage';
 
@@ -20,11 +20,11 @@ interface UsersData {
 }
 
 export function MainPage() {
-  const [user, setUser] = useState<{ nickName: string; soketId: string }>();
+  const [user, setUser] = useState<{ nickName: string; socket: string }>();
   const [users, setUsers] = useState();
   const [pChats, setPchats] = useState<PChat[]>([]);
   const [loading, setLoading] = useState(true);
-  const { socketRef, createNewSocket } = useSocketIo();
+  const { socketRef, socket } = useSocketIo();
 
   const usersData =
     (isNewUsers: boolean) =>
@@ -57,7 +57,6 @@ export function MainPage() {
     };
 
   const initSocket = () => {
-    createNewSocket();
     if (!socketRef.current) return false;
     socketRef.current.on('connect', () => console.log('Connected'));
     socketRef.current.on('LOGOUT', usersData(false));
@@ -66,18 +65,35 @@ export function MainPage() {
 
   useEffect(() => {
     initSocket();
-    console.log(socketRef.current);
   }, []);
 
   useEffect(() => {
     if (socketRef.current) setLoading(false);
   }, [socketRef.current]);
 
+  const handleSetUser = (user: any) => {
+    if (!socketRef.current) return false;
+    setUser(user);
+    socketRef.current.emit('NEW_USER', user);
+  };
+
+  const logout = () => {
+    if (!socketRef.current) return false;
+    socketRef.current.emit('LOGOUT');
+    setUser(undefined);
+  };
+
   if (loading) return <div>loading ...........</div>;
-  if (user) return <ChatPage />;
+  if (user)
+    return (
+      <>
+        <div onClick={logout}>로그아웃</div>
+        <ChatPage socket={socket} />
+      </>
+    );
   return (
     <MainPageStyled>
-      <LoginPage socket={socketRef} />
+      <LoginPage socket={socketRef} setUser={handleSetUser} />
     </MainPageStyled>
   );
 }

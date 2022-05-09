@@ -1,3 +1,4 @@
+import events from "events";
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -23,14 +24,43 @@ io.on("connection", (socket) => {
         });
   });
   socket.on("NEW_USER", (user) => {
+    console.log("[INFO] NEW_USER ");
     users = addUsers(users, user);
     socket.data.user = user;
+    console.log(socket.data.user);
     socket.emit("NEW_USER", { newUsers: users });
   });
 
   socket.on("LOGOUT", () => {
-    users = deleteUser(users, socket.data.user.nickname);
-    io.emit("LOGOUT", { newUsers: users, outUser: socket.data.user.nickname });
+    users = deleteUser(users, socket.data.user.nickName);
+    socket.emit("LOGOUT", {
+      newUsers: users,
+      outUser: socket.data.user.nickName,
+    });
+  });
+
+  socket.on("disconnect", () => {
+    if (socket.data.user) {
+      users = deleteUser(users, socket.data.user.nickName);
+      socket.emit("LOGOUT", {
+        newUsers: users,
+        outUser: socket.data.user.nickName,
+      });
+    }
+  });
+
+  socket.on("TYPING", ({ channel, isTyping }) => {
+    socket.data.user &&
+      io.emit("TYPING", {
+        channel,
+        isTyping,
+        sender: socket.data.user.nickName,
+      });
+  });
+
+  socket.on("P_TYPING", ({ receiver, isTyping }) => {
+    const sender = socket.data.user.nickName;
+    socket.to(receiver).emit("P_TYPING", { channel: sender, isTyping });
   });
 });
 

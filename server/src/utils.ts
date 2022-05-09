@@ -5,7 +5,7 @@ export const createUser = (nickName: string, socketId: string) => ({
 });
 
 export const addUsers = (users: any, user: any) => {
-  users[user.nickname] = user;
+  users[user.nickName] = user;
   return users;
 };
 
