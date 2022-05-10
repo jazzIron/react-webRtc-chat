@@ -1,4 +1,3 @@
-import events from "events";
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -39,7 +38,7 @@ io.on("connection", (socket) => {
     users = addUsers(users, user);
     socket.data.user = user;
     console.log(socket.data.user);
-    socket.emit("NEW_USER", { newUsers: users });
+    io.emit("NEW_USER", { newUsers: users });
   });
 
   socket.on("LOGOUT", () => {
@@ -53,7 +52,7 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     if (socket.data.user) {
       users = deleteUser(users, socket.data.user.nickName);
-      socket.emit("LOGOUT", {
+      io.emit("LOGOUT", {
         newUsers: users,
         outUser: socket.data.user.nickName,
       });
@@ -68,7 +67,7 @@ io.on("connection", (socket) => {
     console.log(`[INFO] MESSAGE_SEND ===========`);
     const message = createMessage(msg, socket.data.user.nickName);
     console.log(message);
-    socket.emit("MESSAGE_SEND", { channel, message });
+    io.emit("MESSAGE_SEND", { channel, message });
   });
 
   socket.on("P_MESSAGE_SEND", ({ receiver, msg }) => {
@@ -87,7 +86,7 @@ io.on("connection", (socket) => {
 
   socket.on("TYPING", ({ channel, isTyping }) => {
     socket.data.user &&
-      socket.emit("TYPING", {
+      io.emit("TYPING", {
         channel,
         isTyping,
         sender: socket.data.user.nickName,
@@ -111,7 +110,7 @@ io.on("connection", (socket) => {
         });
         chatsList.push(channelName);
         chats.push(newChat);
-        socket.emit("CREATE_CHANNEL", newChat);
+        io.emit("CREATE_CHANNEL", newChat);
         updateChatsCallback(false);
       }
     }
