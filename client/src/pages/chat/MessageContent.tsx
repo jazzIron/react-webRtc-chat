@@ -1,7 +1,42 @@
 import styled from '@emotion/styled';
+import moment from 'moment';
+import { ActiveChannel } from './Chat_types';
 
-export function MessageContent() {
-  return <MessageContentStyled>메세지 영역</MessageContentStyled>;
+interface propTypes {
+  activeChannel: {
+    chats: ActiveChannel[];
+    activeChannel: ActiveChannel;
+  };
+  user: any;
 }
 
-const MessageContentStyled = styled.div``;
+export function MessageContent({ activeChannel, user }: propTypes) {
+  const { messages, typingUser } = activeChannel.activeChannel;
+  return (
+    <MessageContentStyled>
+      <div style={{ height: 'calc( 100vh - 250px)', overflowY: 'auto' }}>
+        <div>
+          {messages.length > 0 &&
+            messages.map((message: any) => (
+              <div key={message.id} style={{ marginTop: '0px' }}>
+                <div>
+                  <h3>{message.message}</h3>
+                  {moment(message.time).fromNow()}
+                </div>
+              </div>
+            ))}
+          {typingUser &&
+            typingUser.map((name: any) => (
+              <div key={name} className="typing-user">
+                {`${name[0].toUpperCase() + name.slice(1)} typing`}
+              </div>
+            ))}
+        </div>
+      </div>
+    </MessageContentStyled>
+  );
+}
+
+const MessageContentStyled = styled.div`
+  height: calc(100vh - 200px);
+`;

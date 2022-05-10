@@ -7,7 +7,7 @@ import { ActiveChannel } from './Chat_types';
 
 export function ChatPage({ socket, user, users, pChats, setPChatItems }: any) {
   const [chatData, setChatData] = useState<{
-    chats: any[];
+    chats: ActiveChannel[];
     activeChannel: ActiveChannel;
   }>({
     chats: [
@@ -37,14 +37,16 @@ export function ChatPage({ socket, user, users, pChats, setPChatItems }: any) {
   const updateChats = (_chats: any, init = false) => {
     const { chats, activeChannel } = chatData;
     const newChats = init ? [..._chats] : [...chats, _chats];
+
     setChatData((prev) => {
       return {
         chats: newChats,
-        activeChannel: init ? _chats[0] : prev.activeChannel,
+        activeChannel: init ? _chats[0] : activeChannel,
       };
     });
     console.warn('[INFO] updateChats ==========');
     console.log(newChats);
+    console.log(init ? _chats[0] : activeChannel);
   };
 
   const sendMsg = (msg: any) => {
@@ -79,11 +81,10 @@ export function ChatPage({ socket, user, users, pChats, setPChatItems }: any) {
       }
       return null;
     });
-    setChatData((prev) => {
-      return {
-        ...prev,
-        chats,
-      };
+
+    setChatData({
+      activeChannel: chats[0],
+      chats: chats,
     });
   };
 
@@ -111,11 +112,9 @@ export function ChatPage({ socket, user, users, pChats, setPChatItems }: any) {
       }
       return null;
     });
-    setChatData((prev) => {
-      return {
-        ...prev,
-        chats,
-      };
+    setChatData({
+      activeChannel: chats[0],
+      chats: chats,
     });
   };
 
@@ -139,7 +138,7 @@ export function ChatPage({ socket, user, users, pChats, setPChatItems }: any) {
       {chatData.activeChannel && (
         <>
           <MessageHeader activeChannel={chatData.activeChannel} />
-          <MessageContent />
+          <MessageContent user={user} activeChannel={chatData} />
           <MessageInput sendMsg={sendMsg} sendTyping={sendTyping} />
         </>
       )}
