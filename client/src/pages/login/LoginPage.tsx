@@ -1,9 +1,12 @@
 import styled from '@emotion/styled';
+import { isEmpty } from 'lodash';
 import { useState } from 'react';
 
 export function LoginPage({ socket, setUser }: any) {
-  const [nickName, setNickName] = useState('');
-  const [error, setError] = useState<boolean>(false);
+  const [userData, setUserData] = useState<{ nickName: string; error: string }>({
+    nickName: '',
+    error: '',
+  });
 
   interface isUserCallback {
     user: {
@@ -15,9 +18,20 @@ export function LoginPage({ socket, setUser }: any) {
 
   const isUserCallback = ({ user, isUser }: isUserCallback) => {
     if (isUser) {
-      setError(true);
+      setUserData((prev) => {
+        return {
+          ...prev,
+          error: 'Already nickname',
+        };
+      });
       return console.error('Already nickname');
     } else {
+      setUserData((prev) => {
+        return {
+          ...prev,
+          error: '',
+        };
+      });
       setUser(user);
     }
   };
@@ -25,19 +39,25 @@ export function LoginPage({ socket, setUser }: any) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     const value = e.target.value;
-    setNickName(value);
+    setUserData((prev) => {
+      return {
+        ...prev,
+        nickName: value,
+      };
+    });
   };
 
   const handleClickLoginSubmit = async () => {
     if (!socket.current) return false;
-    socket.current.emit('IS_USER', nickName, isUserCallback);
+    if (isEmpty(userData.nickName)) return false;
+    socket.current.emit('IS_USER', userData.nickName, isUserCallback);
   };
 
   return (
     <LoginPageStyled>
       <input type="text" onChange={handleChange} />
       <button onClick={handleClickLoginSubmit}>버튼</button>
-      {error && <div>닉네임이 중복입니다.</div>}
+      {userData.error && <div>{userData.error}</div>}
     </LoginPageStyled>
   );
 }
