@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { SocketMsgType } from '@src/utils/Constant';
 import { isEmpty } from 'lodash';
 import { useState } from 'react';
 
@@ -50,7 +51,7 @@ export function LoginPage({ socket, setUser }: any) {
   const handleClickLoginSubmit = async () => {
     if (!socket.current) return false;
     if (isEmpty(userData.nickName)) return false;
-    socket.current.emit('IS_USER', userData.nickName, isUserCallback);
+    socket.current.emit(SocketMsgType.IS_USER, userData.nickName, isUserCallback);
   };
 
   return (

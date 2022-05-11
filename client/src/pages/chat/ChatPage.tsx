@@ -4,6 +4,7 @@ import { MessageHeader } from './MessageHeader';
 import { MessageInput } from './MessageInput';
 import { MessageContent } from './MessageContent';
 import { ActiveChannel } from './Chat_types';
+import { SocketMsgType } from '@src/utils/Constant';
 
 export function ChatPage({ socket, user, users, pChats, setPChatItems }: any) {
   const [chatData, setChatData] = useState<{
@@ -23,13 +24,12 @@ export function ChatPage({ socket, user, users, pChats, setPChatItems }: any) {
   });
 
   useEffect(() => {
-    console.log('useEffect');
-    socket.emit('INIT_CHATS', initChats);
-    socket.on('MESSAGE_SEND', addMessage);
-    socket.on('TYPING', addTyping);
-    socket.on('P_MESSAGE_SEND', addPMessage);
-    socket.on('P_TYPING', addPTyping);
-    socket.on('CREATE_CHANNEL', updateChats);
+    socket.emit(SocketMsgType.INIT_CHATS, initChats);
+    socket.on(SocketMsgType.MESSAGE_SEND, addMessage);
+    socket.on(SocketMsgType.TYPING, addTyping);
+    socket.on(SocketMsgType.P_MESSAGE_SEND, addPMessage);
+    socket.on(SocketMsgType.P_TYPING, addPTyping);
+    socket.on(SocketMsgType.CREATE_CHANNEL, updateChats);
   }, []);
 
   const initChats = (_chats: any) => updateChats(_chats, true);
@@ -53,23 +53,23 @@ export function ChatPage({ socket, user, users, pChats, setPChatItems }: any) {
     const { chats, activeChannel } = chatData;
     if (activeChannel.type === 'Private') {
       const receiver = users[activeChannel.name];
-      socket.emit('P_MESSAGE_SEND', { receiver, msg });
+      socket.emit(SocketMsgType.P_MESSAGE_SEND, { receiver, msg });
     } else {
-      socket.emit('MESSAGE_SEND', { channel: activeChannel.name, msg });
+      socket.emit(SocketMsgType.MESSAGE_SEND, { channel: activeChannel.name, msg });
     }
   };
 
   const sendTyping = (isTyping: boolean) => {
-    const { chats, activeChannel } = chatData;
+    const { activeChannel } = chatData;
     if (activeChannel.type === 'Private') {
       let receiver = users[activeChannel.name];
-      socket.emit('P_TYPING', { receiver: receiver.socketId, isTyping });
+      socket.emit(SocketMsgType.P_TYPING, { receiver: receiver.socketId, isTyping });
     }
-    socket.emit('TYPING', { channel: activeChannel.name, isTyping });
+    socket.emit(SocketMsgType.TYPING, { channel: activeChannel.name, isTyping });
   };
 
   const addTyping = ({ channel, isTyping, sender }: any) => {
-    const { chats, activeChannel } = chatData;
+    const { chats } = chatData;
     if (sender === user.nickName) return;
     chats.map((chat: any) => {
       if (chat.name === channel) {
@@ -119,7 +119,7 @@ export function ChatPage({ socket, user, users, pChats, setPChatItems }: any) {
   };
 
   const addPMessage = ({ channel, message }: { channel: string; message: any }) => {
-    const { chats, activeChannel } = chatData;
+    const { activeChannel } = chatData;
     pChats.map((pChat: any) => {
       if (pChat.name === channel) {
         pChat.messages.push(message);
@@ -129,9 +129,6 @@ export function ChatPage({ socket, user, users, pChats, setPChatItems }: any) {
     });
     setPChatItems(pChats);
   };
-
-  console.log('[INFO] ChatPage ======');
-  console.log(chatData);
 
   return (
     <ChatPageStyled>

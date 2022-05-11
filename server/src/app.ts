@@ -1,6 +1,7 @@
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { SocketMsgType } from "./chat/Constant";
 import {
   isUser,
   createUser,
@@ -24,8 +25,8 @@ let communityChat = createChat();
 let chats = [communityChat];
 
 io.on("connection", (socket) => {
-  // 닉네임 중복 체크 및 닉네임 + socketId 돌려줌
-  socket.on("IS_USER", (nickName, isUserCallback) => {
+  socket.on(SocketMsgType.IS_USER, (nickName, isUserCallback) => {
+    // 닉네임 중복체크
     isUser(users, nickName)
       ? isUserCallback({ isUser: true, user: null })
       : isUserCallback({
@@ -33,84 +34,83 @@ io.on("connection", (socket) => {
           isUser: false,
         });
   });
-  socket.on("NEW_USER", (user) => {
+
+  socket.on(SocketMsgType.NEW_USER, (user) => {
     console.log("[INFO] NEW_USER ");
     users = addUsers(users, user);
     socket.data.user = user;
-    console.log(socket.data.user);
-    io.emit("NEW_USER", { newUsers: users });
+    io.emit(SocketMsgType.NEW_USER, { newUsers: users });
   });
 
-  socket.on("LOGOUT", () => {
+  socket.on(SocketMsgType.LOGOUT, () => {
     users = deleteUser(users, socket.data.user.nickName);
-    socket.emit("LOGOUT", {
+    socket.emit(SocketMsgType.LOGOUT, {
       newUsers: users,
       outUser: socket.data.user.nickName,
     });
   });
 
-  socket.on("disconnect", () => {
+  socket.on(SocketMsgType.DISCONNECT, () => {
     if (socket.data.user) {
       users = deleteUser(users, socket.data.user.nickName);
-      io.emit("LOGOUT", {
+      io.emit(SocketMsgType.LOGOUT, {
         newUsers: users,
         outUser: socket.data.user.nickName,
       });
     }
   });
 
-  socket.on("INIT_CHATS", (initChatsCallback) => {
+  socket.on(SocketMsgType.INIT_CHATS, (initChatsCallback) => {
     initChatsCallback(chats);
   });
 
-  socket.on("MESSAGE_SEND", ({ channel, msg }) => {
+  socket.on(SocketMsgType.MESSAGE_SEND, ({ channel, msg }) => {
     console.log(`[INFO] MESSAGE_SEND ===========`);
     const message = createMessage(msg, socket.data.user.nickName);
-    console.log(message);
-    io.emit("MESSAGE_SEND", { channel, message });
+    io.emit(SocketMsgType.MESSAGE_SEND, { channel, message });
   });
 
-  socket.on("P_MESSAGE_SEND", ({ receiver, msg }) => {
+  socket.on(SocketMsgType.P_MESSAGE_SEND, ({ receiver, msg }) => {
     if (socket.data.user) {
       const sender = socket.data.user.nickName;
       const message = createMessage(msg, sender);
       socket
         .to(receiver.socketId)
-        .emit("P_MESSAGE_SEND", { channel: sender, message });
-      socket.emit("P_MESSAGE_SEND", {
+        .emit(SocketMsgType.P_MESSAGE_SEND, { channel: sender, message });
+      socket.emit(SocketMsgType.P_MESSAGE_SEND, {
         channel: receiver.nickName,
         message,
       });
     }
   });
 
-  socket.on("TYPING", ({ channel, isTyping }) => {
+  socket.on(SocketMsgType.TYPING, ({ channel, isTyping }) => {
     socket.data.user &&
-      io.emit("TYPING", {
+      io.emit(SocketMsgType.TYPING, {
         channel,
         isTyping,
         sender: socket.data.user.nickName,
       });
   });
 
-  socket.on("P_TYPING", ({ receiver, isTyping }) => {
+  socket.on(SocketMsgType.P_TYPING, ({ receiver, isTyping }) => {
     const sender = socket.data.user.nickName;
     socket.to(receiver).emit("P_TYPING", { channel: sender, isTyping });
   });
 
   socket.on(
-    "CHECK_CHANNEL",
+    SocketMsgType.CHECK_CHANNEL,
     ({ channelName, channelDescription }, updateChatsCallback) => {
       if (isChannel(channelName, chatsList)) {
         updateChatsCallback(true);
       } else {
-        let newChat = createChat({
+        const newChat = createChat({
           name: channelName,
           description: channelDescription,
         });
         chatsList.push(channelName);
         chats.push(newChat);
-        io.emit("CREATE_CHANNEL", newChat);
+        io.emit(SocketMsgType.CREATE_CHANNEL, newChat);
         updateChatsCallback(false);
       }
     }

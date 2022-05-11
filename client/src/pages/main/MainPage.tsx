@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import useSocketIo from '@src/hooks/socketIo/useSocketIo';
+import { SocketMsgType } from '@src/utils/Constant';
 import { useEffect, useState } from 'react';
 import { ChatPage } from '../chat/ChatPage';
 import { LoginPage } from '../login/LoginPage';
@@ -22,7 +23,7 @@ export function MainPage() {
   const [user, setUser] = useState<{ nickName: string; socket: string }>();
   const [users, setUsers] = useState();
   const [pChats, setPChats] = useState<any>([]);
-  // const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const { socketRef, socket } = useSocketIo();
 
   const setPChatItems = (value: any) => {
@@ -62,33 +63,33 @@ export function MainPage() {
   const initSocket = () => {
     if (!socketRef.current) return false;
     socketRef.current.on('connect', () => console.log('Connected'));
-    socketRef.current.on('LOGOUT', usersData(false));
-    socketRef.current.on('NEW_USER', usersData(true));
+    socketRef.current.on(SocketMsgType.LOGOUT, usersData(false));
+    socketRef.current.on(SocketMsgType.NEW_USER, usersData(true));
   };
 
   useEffect(() => {
     initSocket();
   }, []);
 
-  // useEffect(() => {
-  //   if (socketRef.current) setLoading(false);
-  // }, [socketRef.current]);
+  useEffect(() => {
+    if (socketRef.current) setLoading(false);
+  }, [socketRef.current]);
 
   const handleSetUser = (user: any) => {
     if (!socketRef.current) return false;
     setUser(user);
-    socketRef.current.emit('NEW_USER', user);
+    socketRef.current.emit(SocketMsgType.NEW_USER, user);
   };
 
   const logout = () => {
     if (!socketRef.current) return false;
-    socketRef.current.emit('LOGOUT');
+    socketRef.current.emit(SocketMsgType.LOGOUT);
     setUser(undefined);
   };
 
   console.log('*********************MainPage********************');
 
-  // if (loading) return <div>loading ...........</div>;
+  if (loading) return <div>loading ...........</div>;
   if (user)
     return (
       <>

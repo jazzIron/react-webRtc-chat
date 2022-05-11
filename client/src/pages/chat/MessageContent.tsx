@@ -12,6 +12,7 @@ interface propTypes {
 
 export function MessageContent({ activeChannel, user }: propTypes) {
   const { messages, typingUser } = activeChannel.activeChannel;
+  console.log(user);
   return (
     <MessageContentStyled>
       <div style={{ height: 'calc( 100vh - 250px)', overflowY: 'auto' }}>
@@ -21,6 +22,7 @@ export function MessageContent({ activeChannel, user }: propTypes) {
               <div key={message.id} style={{ marginTop: '0px' }}>
                 <div>
                   <h3>{message.message}</h3>
+                  {message.sender[0].toUpperCase() + message.sender.slice(1)}
                   {moment(message.time).fromNow()}
                 </div>
               </div>
