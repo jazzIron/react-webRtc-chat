@@ -1,21 +1,28 @@
 import styled from '@emotion/styled';
 import { SocketMsgType } from '@src/utils/Constant';
 import { isEmpty } from 'lodash';
-import { useState } from 'react';
+import { MutableRefObject, useState } from 'react';
+import { Socket } from 'socket.io-client';
+import { User, UserData } from '../User_types';
 
-export function LoginPage({ socket, setUser }: any) {
-  const [userData, setUserData] = useState<{ nickName: string; error: string }>({
+interface propTypes {
+  socket?: MutableRefObject<Socket | undefined>;
+  setUser?: (user: User) => void;
+}
+
+interface isUserCallback {
+  user: {
+    nickName: string;
+    socketId: string;
+  };
+  isUser: boolean;
+}
+
+export function LoginPage({ socket, setUser }: propTypes) {
+  const [userData, setUserData] = useState<UserData>({
     nickName: '',
     error: '',
   });
-
-  interface isUserCallback {
-    user: {
-      nickName: string;
-      socketId: string;
-    };
-    isUser: boolean;
-  }
 
   const isUserCallback = ({ user, isUser }: isUserCallback) => {
     if (isUser) {
@@ -33,22 +40,22 @@ export function LoginPage({ socket, setUser }: any) {
           error: '',
         };
       });
-      setUser(user);
+      setUser && setUser(user);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
-    const value = e.target.value;
     setUserData((prev) => {
       return {
         ...prev,
-        nickName: value,
+        nickName: e.target.value,
       };
     });
   };
 
   const handleClickLoginSubmit = async () => {
+    if (!socket) return false;
     if (!socket.current) return false;
     if (isEmpty(userData.nickName)) return false;
     socket.current.emit(SocketMsgType.IS_USER, userData.nickName, isUserCallback);

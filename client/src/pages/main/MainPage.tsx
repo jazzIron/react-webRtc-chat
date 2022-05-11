@@ -2,31 +2,19 @@ import styled from '@emotion/styled';
 import useSocketIo from '@src/hooks/socketIo/useSocketIo';
 import { SocketMsgType } from '@src/utils/Constant';
 import { useEffect, useState } from 'react';
+import { PChat } from '../chat';
 import { ChatPage } from '../chat/ChatPage';
 import { LoginPage } from '../login/LoginPage';
-
-interface PChat {
-  name: string;
-  description: string;
-  messages: [];
-  isTyping: boolean;
-  msgCount: number;
-  type: string;
-}
-
-interface UsersData {
-  newUsers: any;
-  outUser: any;
-}
+import { User, UsersData } from '../User_types';
 
 export function MainPage() {
-  const [user, setUser] = useState<{ nickName: string; socket: string }>();
-  const [users, setUsers] = useState();
-  const [pChats, setPChats] = useState<any>([]);
+  const [user, setUser] = useState<User>();
+  const [users, setUsers] = useState<User[]>();
+  const [pChats, setPChats] = useState<PChat[]>([]);
   const [loading, setLoading] = useState(true);
   const { socketRef, socket } = useSocketIo();
 
-  const setPChatItems = (value: any) => {
+  const setPChatItems = (value: PChat[]) => {
     setPChats(value);
   };
 
@@ -34,14 +22,14 @@ export function MainPage() {
     (isNewUsers: boolean) =>
     ({ newUsers, outUser }: UsersData) => {
       if (isNewUsers) {
-        let newPChats = [...pChats];
-        let oldPChats = pChats.map((pChat: any) => pChat.name);
+        const newPChats = [...pChats];
+        const oldPChats = pChats.map((pChat) => pChat.name);
         user &&
           Object.keys(newUsers).map((newUser) => {
             if (newUser !== user.nickName && !oldPChats.includes(newUser)) {
               newPChats.push({
                 name: newUser,
-                description: 'direct message',
+                description: 'directMsg',
                 messages: [],
                 isTyping: false,
                 msgCount: 0,
@@ -50,11 +38,10 @@ export function MainPage() {
             }
             return null;
           });
-
         setUsers(newUsers);
         setPChats(newPChats);
       } else {
-        const newPChats = pChats.filter((pChat: any) => pChat.name !== outUser);
+        const newPChats = pChats.filter((pChat) => pChat.name !== outUser);
         setUsers(newUsers);
         setPChats(newPChats);
       }
@@ -75,7 +62,7 @@ export function MainPage() {
     if (socketRef.current) setLoading(false);
   }, [socketRef.current]);
 
-  const handleSetUser = (user: any) => {
+  const handleSetUser = (user: User) => {
     if (!socketRef.current) return false;
     setUser(user);
     socketRef.current.emit(SocketMsgType.NEW_USER, user);
@@ -87,9 +74,8 @@ export function MainPage() {
     setUser(undefined);
   };
 
-  console.log('*********************MainPage********************');
-
   if (loading) return <div>loading ...........</div>;
+
   if (user)
     return (
       <>

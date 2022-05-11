@@ -1,4 +1,4 @@
-export type ActiveType = 'Private' | 'Community';
+export type ChannelType = 'Private' | 'Community';
 
 export interface Messages {
   id: string; // socket_id
@@ -7,10 +7,19 @@ export interface Messages {
   time: Date | string; // 보낸시간
 }
 export interface ActiveChannel {
-  type?: ActiveType;
+  type?: ChannelType;
   description: string; //Public room
   messages: Messages[];
   msgCount: number;
   name: string; // channel name
   typingUser: string[];
+}
+
+export interface PChat {
+  name: string;
+  description: string;
+  messages: [];
+  isTyping: boolean;
+  msgCount: number;
+  type: ChannelType;
 }
