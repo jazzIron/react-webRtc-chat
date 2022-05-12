@@ -6,6 +6,7 @@ import { PChat } from '../chat';
 import { ChatPage } from '../chat/ChatPage';
 import { LoginPage } from '../login/LoginPage';
 import { User, UsersData } from '../User_types';
+import { SideMenu } from '../layout/SideMenu';
 
 export function MainPage() {
   const [user, setUser] = useState<User>();
@@ -79,13 +80,13 @@ export function MainPage() {
   if (user)
     return (
       <>
-        <div onClick={logout}>로그아웃</div>
         <ChatPage
           socket={socket}
           user={user}
           users={users}
           pChats={pChats}
           setPChatItems={setPChatItems}
+          logout={logout}
         />
       </>
     );

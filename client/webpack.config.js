@@ -31,6 +31,7 @@ module.exports = (env) => {
       filename: '[name]_bundle.js',
       assetModuleFilename: 'assets/images/[name][ext]',
       clean: true,
+      publicPath: '/',
     },
     devServer: {
       static: {

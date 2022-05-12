@@ -100,7 +100,9 @@ io.on("connection", (socket) => {
 
   socket.on(
     SocketMsgType.CHECK_CHANNEL,
-    ({ channelName, channelDescription }, updateChatsCallback) => {
+    ({ channelName, channelDescription, channelId }, updateChatsCallback) => {
+      console.log(`[INFO] CHECK_CHANNEL ===========`);
+
       if (isChannel(channelName, chatsList)) {
         updateChatsCallback(true);
       } else {

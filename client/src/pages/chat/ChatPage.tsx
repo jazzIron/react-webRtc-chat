@@ -5,8 +5,9 @@ import { MessageInput } from './MessageInput';
 import { MessageContent } from './MessageContent';
 import { ActiveChannel, ChannelType, Messages } from './Chat_types';
 import { SocketMsgType } from '@src/utils/Constant';
+import { SideMenu } from '../layout/SideMenu';
 
-export function ChatPage({ socket, user, users, pChats, setPChatItems }: any) {
+export function ChatPage({ socket, user, users, pChats, setPChatItems, logout }: any) {
   const [chatData, setChatData] = useState<{
     chats: ActiveChannel[];
     activeChannel: ActiveChannel;
@@ -138,6 +139,13 @@ export function ChatPage({ socket, user, users, pChats, setPChatItems }: any) {
 
   return (
     <ChatPageStyled>
+      <SideMenu
+        socket={socket}
+        user={user}
+        users={users}
+        chats={chatData.chats}
+        onLogout={logout}
+      />
       {chatData.activeChannel && (
         <>
           <MessageHeader activeChannel={chatData.activeChannel} />
