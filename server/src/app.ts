@@ -44,7 +44,7 @@ io.on("connection", (socket) => {
 
   socket.on(SocketMsgType.LOGOUT, () => {
     users = deleteUser(users, socket.data.user.nickName);
-    socket.emit(SocketMsgType.LOGOUT, {
+    io.emit(SocketMsgType.LOGOUT, {
       newUsers: users,
       outUser: socket.data.user.nickName,
     });
@@ -66,8 +66,22 @@ io.on("connection", (socket) => {
 
   socket.on(SocketMsgType.MESSAGE_SEND, ({ channel, msg }) => {
     console.log(`[INFO] MESSAGE_SEND ===========`);
+
     const message = createMessage(msg, socket.data.user.nickName);
+
+    console.log(channel);
+    console.log(message);
+
     io.emit(SocketMsgType.MESSAGE_SEND, { channel, message });
+  });
+
+  socket.on(SocketMsgType.TYPING, ({ channel, isTyping }) => {
+    socket.data.user &&
+      io.emit(SocketMsgType.TYPING, {
+        channel,
+        isTyping,
+        sender: socket.data.user.nickName,
+      });
   });
 
   socket.on(SocketMsgType.P_MESSAGE_SEND, ({ receiver, msg }) => {
@@ -84,23 +98,16 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on(SocketMsgType.TYPING, ({ channel, isTyping }) => {
-    socket.data.user &&
-      io.emit(SocketMsgType.TYPING, {
-        channel,
-        isTyping,
-        sender: socket.data.user.nickName,
-      });
-  });
-
   socket.on(SocketMsgType.P_TYPING, ({ receiver, isTyping }) => {
     const sender = socket.data.user.nickName;
-    socket.to(receiver).emit("P_TYPING", { channel: sender, isTyping });
+    socket
+      .to(receiver)
+      .emit(SocketMsgType.P_TYPING, { channel: sender, isTyping });
   });
 
   socket.on(
     SocketMsgType.CHECK_CHANNEL,
-    ({ channelName, channelDescription, channelId }, updateChatsCallback) => {
+    ({ channelName, channelDescription }, updateChatsCallback) => {
       console.log(`[INFO] CHECK_CHANNEL ===========`);
 
       if (isChannel(channelName, chatsList)) {

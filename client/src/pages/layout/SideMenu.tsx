@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
+import { SocketMsgType } from '@src/utils/Constant';
 import { MutableRefObject } from 'react';
 import { Socket } from 'socket.io-client';
-import { ActiveChannel } from '../chat';
+import { ActiveChannel, PChat } from '../chat';
 import { User, Users } from '../User_types';
 
 interface propTypes {
@@ -9,25 +10,46 @@ interface propTypes {
   user: User;
   users: Users;
   chats: ActiveChannel[];
+  pChats: PChat[];
+  activeChannel: ActiveChannel;
+  setActiveChannel: (name: string) => void;
+  setActivePrivateChannel: (name: string) => void;
   onLogout: () => void;
 }
 
 //온라인 유저 리스트 생성
-const OnlineUserList = (user: User, users: Users) => {
-  console.log('[INFO] OnlineUserList ==============');
-  console.log(users);
+const OnlineUserList = (
+  user: User,
+  users: Users,
+  pChats: PChat[],
+  activeChannel: ActiveChannel,
+  setActivePrivateChannel: (name: string) => void,
+) => {
+  // console.log('[INFO] OnlineUserList ==============');
+  // console.log(users);
   return Object.keys(users).map((user) => {
-    console.log(user);
-    return <div>{user}</div>;
+    const pChat = pChats.filter((pchat) => pchat.name === user);
+    let msgCount = null;
+    if (pChat[0] && pChat[0].name !== activeChannel.name) {
+      if (pChat[0].msgCount > 0) {
+        msgCount = pChat[0].msgCount;
+      }
+    }
+    return (
+      <div onClick={() => setActivePrivateChannel(user)}>
+        <div>{user}</div>
+        <div>{msgCount && { msgCount }}</div>
+      </div>
+    );
   });
 };
 
 // 채널 리스트 생성
-const ChannelList = (chats: ActiveChannel[]) => {
+const ChannelList = (chats: ActiveChannel[], setActiveChannel: any) => {
   console.log('[INFO] ChannelList ==============');
   console.log(chats);
   return chats.map((chat) => (
-    <div key={chat.name}>
+    <div key={chat.name} onClick={() => setActiveChannel(chat.name)}>
       # {chat.name}
       {chat.msgCount > 0 && <strong>{chat.msgCount}</strong>}
     </div>
@@ -40,31 +62,34 @@ const checkChannel = (isChannel: boolean) => {
 };
 
 const handleMakeChannel = (socket: any) => {
-  const channelName = 'TEST';
-  const channelDescription = 'TEST_DESC';
-  const channelId = 'TEST_ID';
-  socket.emit('CHECK_CHANNEL', { channelName, channelDescription, channelId }, checkChannel);
+  const channelName = `CHANNEL_${Math.floor(Math.random() * 100)}`;
+  const channelDescription = 'Common_Channel';
+  socket.emit(SocketMsgType.CHECK_CHANNEL, { channelName, channelDescription }, checkChannel);
 };
 
-export function SideMenu({ socket, user, users, chats, onLogout }: propTypes) {
-  console.log('SideMenu');
-  console.log(user);
-  console.log(users);
-  console.log(chats);
-  console.log(chats[0] && ChannelList(chats));
-
+export function SideMenu({
+  socket,
+  user,
+  users,
+  chats,
+  pChats,
+  activeChannel,
+  onLogout,
+  setActiveChannel,
+  setActivePrivateChannel,
+}: propTypes) {
   return (
     <SideMenuStyled>
       <div>로그인 정보 : {user.nickName}</div>
       <div onClick={onLogout}>로그아웃</div>
-      <div onClick={() => handleMakeChannel(socket)}>채널 생성</div>s
+      <div onClick={() => handleMakeChannel(socket)}>채널 생성</div>
       <div>
         채널 리스트
-        {chats[0] && ChannelList(chats)}
+        {chats[0] && ChannelList(chats, setActiveChannel)}
       </div>
       <div>
         온라인 유저리스트
-        {users && OnlineUserList(user, users)}
+        {users && OnlineUserList(user, users, pChats, activeChannel, setActivePrivateChannel)}
       </div>
     </SideMenuStyled>
   );

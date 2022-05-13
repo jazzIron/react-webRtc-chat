@@ -5,23 +5,18 @@ import { useEffect, useState } from 'react';
 import { PChat } from '../chat';
 import { ChatPage } from '../chat/ChatPage';
 import { LoginPage } from '../login/LoginPage';
-import { User, UsersData } from '../User_types';
-import { SideMenu } from '../layout/SideMenu';
+import { User, Users } from '../User_types';
 
 export function MainPage() {
   const [user, setUser] = useState<User>();
-  const [users, setUsers] = useState<User[]>();
+  const [users, setUsers] = useState<Users>();
   const [pChats, setPChats] = useState<PChat[]>([]);
   const [loading, setLoading] = useState(true);
   const { socketRef, socket } = useSocketIo();
 
-  const setPChatItems = (value: PChat[]) => {
-    setPChats(value);
-  };
-
   const usersData =
     (isNewUsers: boolean) =>
-    ({ newUsers, outUser }: UsersData) => {
+    ({ newUsers, outUser }: any) => {
       if (isNewUsers) {
         const newPChats = [...pChats];
         const oldPChats = pChats.map((pChat) => pChat.name);
@@ -77,17 +72,10 @@ export function MainPage() {
 
   if (loading) return <div>loading ...........</div>;
 
-  if (user)
+  if (user && users)
     return (
       <>
-        <ChatPage
-          socket={socket}
-          user={user}
-          users={users}
-          pChats={pChats}
-          setPChatItems={setPChatItems}
-          logout={logout}
-        />
+        <ChatPage socket={socket} user={user} users={users} pChats={pChats} logout={logout} />
       </>
     );
   return (

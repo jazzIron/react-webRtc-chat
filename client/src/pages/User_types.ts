@@ -8,7 +8,7 @@ export interface Users {
 }
 
 export interface UsersData {
-  newUsers: User[];
+  newUsers: User;
   outUser: any;
 }
 

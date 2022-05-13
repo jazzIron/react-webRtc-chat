@@ -16,10 +16,10 @@ export interface ActiveChannel {
 }
 
 export interface PChat {
-  name: string;
+  type?: ChannelType;
   description: string;
-  messages: [];
-  isTyping: boolean;
+  messages: Messages[];
+  name: string; // user name
   msgCount: number;
-  type: ChannelType;
+  isTyping: boolean;
 }

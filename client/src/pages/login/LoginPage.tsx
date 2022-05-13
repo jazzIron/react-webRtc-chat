@@ -20,7 +20,7 @@ interface isUserCallback {
 
 export function LoginPage({ socket, setUser }: propTypes) {
   const [userData, setUserData] = useState<UserData>({
-    nickName: '',
+    nickName: `USER_${Math.floor(Math.random() * 100)}`,
     error: '',
   });
 
@@ -57,17 +57,34 @@ export function LoginPage({ socket, setUser }: propTypes) {
   const handleClickLoginSubmit = async () => {
     if (!socket) return false;
     if (!socket.current) return false;
+    // NOTE: TEST RANDOM USER NICKNAME
     if (isEmpty(userData.nickName)) return false;
     socket.current.emit(SocketMsgType.IS_USER, userData.nickName, isUserCallback);
   };
 
   return (
     <LoginPageStyled>
-      <input type="text" onChange={handleChange} />
-      <button onClick={handleClickLoginSubmit}>버튼</button>
-      {userData.error && <div>{userData.error}</div>}
+      <input type="text" onChange={handleChange} placeholder={'닉네임을 입력해 주세요.'} />
+      <SubmitBtnWrapper onClick={handleClickLoginSubmit}>접속</SubmitBtnWrapper>
+      {userData.error && <ErrorMsgWrapper>{userData.error}</ErrorMsgWrapper>}
     </LoginPageStyled>
   );
 }
 
-const LoginPageStyled = styled.div``;
+const LoginPageStyled = styled.div`
+  display: flex;
+  text-align: center;
+`;
+
+const SubmitBtnWrapper = styled.div`
+  padding: 1rem;
+  background-color: #000;
+  color: #fff;
+  size: 16px;
+`;
+
+const ErrorMsgWrapper = styled.div`
+  margin-top: 8px;
+  color: red;
+  font-weight: 700;
+`;

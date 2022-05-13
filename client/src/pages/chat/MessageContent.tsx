@@ -40,5 +40,5 @@ export function MessageContent({ activeChannel, user }: propTypes) {
 }
 
 const MessageContentStyled = styled.div`
-  height: calc(100vh - 200px);
+  height: calc(100vh - 250px);
 `;

@@ -1,4 +1,13 @@
 const { v4: uuidv4 } = require("uuid");
+
+export interface User {
+  nickName: string;
+  socketId: string;
+}
+interface Users {
+  users: { [key: string]: User };
+}
+
 export const isUser = (users: any, nickName: string) => nickName in users;
 export const createUser = (nickName: string, socketId: string) => ({
   nickName,
