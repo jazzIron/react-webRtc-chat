@@ -6,6 +6,7 @@ interface propTypes {
 }
 
 export function MessageHeader({ activeChannel }: propTypes) {
+  console.log(activeChannel);
   return (
     <MessageHeaderStyled>
       <div>

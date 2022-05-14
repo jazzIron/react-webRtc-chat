@@ -3,16 +3,18 @@ import moment from 'moment';
 import { ActiveChannel } from './Chat_types';
 
 interface propTypes {
-  activeChannel: {
-    chats: ActiveChannel[];
-    activeChannel: ActiveChannel;
-  };
+  activeChannel: ActiveChannel;
+  chats: ActiveChannel[];
   user: any;
 }
 
-export function MessageContent({ activeChannel, user }: propTypes) {
-  const { messages, typingUser } = activeChannel.activeChannel;
+export function MessageContent({ chats, activeChannel, user }: propTypes) {
+  const { messages, typingUser } = activeChannel;
+
+  console.log('========================MessageContent=================');
   console.log(user);
+  console.log(typingUser);
+  console.log(activeChannel);
   return (
     <MessageContentStyled>
       <div style={{ height: 'calc( 100vh - 250px)', overflowY: 'auto' }}>
@@ -40,5 +42,5 @@ export function MessageContent({ activeChannel, user }: propTypes) {
 }
 
 const MessageContentStyled = styled.div`
-  height: calc(100vh - 250px);
+  height: calc(100vh - 500px);
 `;

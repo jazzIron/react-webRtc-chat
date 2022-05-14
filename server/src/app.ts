@@ -65,10 +65,11 @@ io.on("connection", (socket) => {
   });
 
   socket.on(SocketMsgType.MESSAGE_SEND, ({ channel, msg }) => {
-    console.log(`[INFO] MESSAGE_SEND ===========`);
-
     const message = createMessage(msg, socket.data.user.nickName);
 
+    console.log(
+      `=================================[INFO] MESSAGE_SEND ===========`
+    );
     console.log(channel);
     console.log(message);
 
@@ -76,6 +77,11 @@ io.on("connection", (socket) => {
   });
 
   socket.on(SocketMsgType.TYPING, ({ channel, isTyping }) => {
+    console.log("========================TYPING======================");
+    console.log(channel);
+    console.log(isTyping);
+    console.log(socket.data.user.nickName);
+
     socket.data.user &&
       io.emit(SocketMsgType.TYPING, {
         channel,
