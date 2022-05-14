@@ -72,10 +72,10 @@ export function MainPage() {
 
   if (loading) return <div>loading ...........</div>;
 
-  if (user && users)
+  if (user)
     return (
       <>
-        <ChatPage socket={socket} user={user} users={users} pChats={pChats} logout={logout} />
+        <ChatPage socket={socket} user={user} pChats={pChats} logout={logout} />
       </>
     );
   return (
