@@ -13,7 +13,7 @@ import { activeChannelState, Chat, chatsState } from '@src/store/chatState';
 interface propTypes {
   socket: any;
   user: User;
-  users: Users;
+  // users: Users;
   pChats: PChat[];
   logout: () => void;
 }
@@ -29,7 +29,7 @@ interface AddMessage {
   message: Messages;
 }
 
-export function ChatPage({ socket, user, users, pChats, logout }: propTypes) {
+export function ChatPage({ socket, user, pChats, logout }: propTypes) {
   const [chats, setChats] = useRecoilState(chatsState);
   const [activeChannel, setActiveChannel] = useRecoilState(activeChannelState);
 
@@ -74,6 +74,7 @@ export function ChatPage({ socket, user, users, pChats, logout }: propTypes) {
       return null;
     });
     setChats(chats);
+    setActiveChannel(chats[0]);
   };
 
   const sendMsg = (msg: string) => {
@@ -181,7 +182,7 @@ export function ChatPage({ socket, user, users, pChats, logout }: propTypes) {
       {activeChannel && (
         <>
           <MessageHeader activeChannel={activeChannel} />
-          <MessageContent user={user} chats={chats} activeChannel={activeChannel} />
+          <MessageContent user={user} activeChannel={activeChannel} />
           <MessageInput sendMsg={sendMsg} sendTyping={sendTyping} />
         </>
       )}

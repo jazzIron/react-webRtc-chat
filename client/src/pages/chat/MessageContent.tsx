@@ -4,11 +4,10 @@ import { ActiveChannel } from './Chat_types';
 
 interface propTypes {
   activeChannel: ActiveChannel;
-  chats: ActiveChannel[];
   user: any;
 }
 
-export function MessageContent({ chats, activeChannel, user }: propTypes) {
+export function MessageContent({ activeChannel, user }: propTypes) {
   const { messages, typingUser } = activeChannel;
 
   console.log('========================MessageContent=================');
