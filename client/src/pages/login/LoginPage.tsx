@@ -20,7 +20,7 @@ interface isUserCallback {
 
 export function LoginPage({ socket, setUser }: propTypes) {
   const [userData, setUserData] = useState<UserData>({
-    nickName: `USER_${Math.floor(Math.random() * 100)}`,
+    nickName: `USER_${Math.floor(Math.random() * 10000)}`,
     error: '',
   });
 

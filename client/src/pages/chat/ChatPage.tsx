@@ -81,24 +81,26 @@ export function ChatPage({ socket, user, pChats, logout }: propTypes) {
     console.log('================== [INFO] sendMsg==================');
     console.log(activeChannel);
 
-    if (activeChannel.type === 'Private') {
-      // const receiver = users[activeChannel.name];
-      // console.log(receiver);
-      // socket.emit(SocketMsgType.P_MESSAGE_SEND, { receiver, msg });
-    } else {
-      socket.emit(SocketMsgType.MESSAGE_SEND, { channel: activeChannel.name, msg });
-    }
+    // if (activeChannel.type === 'Private') {
+    //   const receiver = users[activeChannel.name];
+    //   console.log(receiver);
+    //   socket.emit(SocketMsgType.P_MESSAGE_SEND, { receiver, msg });
+    // } else {
+    //   socket.emit(SocketMsgType.MESSAGE_SEND, { channel: activeChannel.name, msg });
+    // }
+
+    socket.emit(SocketMsgType.MESSAGE_SEND, { channel: activeChannel.name, msg });
   };
 
   const sendTyping = (isTyping: boolean) => {
     console.log('================== [INFO] sendTyping==================');
     console.log(chats);
 
-    if (activeChannel.type === 'Private') {
-      const channelName = activeChannel.name;
-      // const receiver = users[channelName];
-      // socket.emit(SocketMsgType.P_TYPING, { receiver: receiver.socketId, isTyping });
-    }
+    // if (activeChannel.type === 'Private') {
+    //   const channelName = activeChannel.name;
+    //   const receiver = users[channelName];
+    //   socket.emit(SocketMsgType.P_TYPING, { receiver: receiver.socketId, isTyping });
+    // }
     socket.emit(SocketMsgType.TYPING, { channel: activeChannel.name, isTyping });
   };
 
@@ -116,6 +118,7 @@ export function ChatPage({ socket, user, pChats, logout }: propTypes) {
       return null;
     });
     setChats(chats);
+    setActiveChannel(chats[0]);
   };
 
   const addPTyping = ({ channel, isTyping }: Omit<AddTyping, 'sender'>) => {
@@ -147,20 +150,20 @@ export function ChatPage({ socket, user, pChats, logout }: propTypes) {
     // });
   };
 
-  const onActiveChannel = (name: string) => {
-    const newActiveChannel = chats.filter((chat) => chat.name === name);
-    newActiveChannel[0].msgCount = 0;
+  // const onActiveChannel = (name: string) => {
+  //   const newActiveChannel = chats.filter((chat) => chat.name === name);
+  //   newActiveChannel[0].msgCount = 0;
 
-    console.log('[INFO] setActiveChannel *************************');
-    console.log(newActiveChannel);
-    setActiveChannel(newActiveChannel[0]);
-  };
+  //   console.log('[INFO] setActiveChannel *************************');
+  //   console.log(newActiveChannel);
+  //   setActiveChannel(newActiveChannel[0]);
+  // };
 
-  const setActivePrivateChannel = (name: string) => {
-    const newActiveChannel = pChats.filter((pChat: any) => pChat.name === name);
-    newActiveChannel[0].msgCount = 0;
-    //setActiveChannel(newActiveChannel[0]);
-  };
+  // const setActivePrivateChannel = (name: string) => {
+  //   const newActiveChannel = pChats.filter((pChat: any) => pChat.name === name);
+  //   newActiveChannel[0].msgCount = 0;
+  //   //setActiveChannel(newActiveChannel[0]);
+  // };
 
   console.log('=======================[INFO]ChatPage=======================');
   console.log(chats);
@@ -179,13 +182,17 @@ export function ChatPage({ socket, user, pChats, logout }: propTypes) {
         setActivePrivateChannel={setActivePrivateChannel}
         onLogout={logout}
       /> */}
-      {activeChannel && (
+      {
         <>
           <MessageHeader activeChannel={activeChannel} />
-          <MessageContent user={user} activeChannel={activeChannel} />
+          <MessageContent
+            user={user}
+            messages={activeChannel.messages}
+            typingUser={activeChannel.typingUser}
+          />
           <MessageInput sendMsg={sendMsg} sendTyping={sendTyping} />
         </>
-      )}
+      }
     </ChatPageStyled>
   );
 }

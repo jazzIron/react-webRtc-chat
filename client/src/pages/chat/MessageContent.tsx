@@ -1,19 +1,17 @@
 import styled from '@emotion/styled';
 import moment from 'moment';
-import { ActiveChannel } from './Chat_types';
+import { ActiveChannel, Messages } from './Chat_types';
 
 interface propTypes {
-  activeChannel: ActiveChannel;
+  messages: Messages[];
+  typingUser: string[];
   user: any;
 }
 
-export function MessageContent({ activeChannel, user }: propTypes) {
-  const { messages, typingUser } = activeChannel;
-
+export function MessageContent({ messages, typingUser, user }: propTypes) {
   console.log('========================MessageContent=================');
   console.log(user);
   console.log(typingUser);
-  console.log(activeChannel);
   return (
     <MessageContentStyled>
       <div style={{ height: 'calc( 100vh - 250px)', overflowY: 'auto' }}>

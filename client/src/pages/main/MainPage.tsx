@@ -4,6 +4,7 @@ import { SocketMsgType } from '@src/utils/Constant';
 import { useEffect, useState } from 'react';
 import { PChat } from '../chat';
 import { ChatPage } from '../chat/ChatPage';
+import { ChatPage2 } from '../chat/ChatPage2';
 import { LoginPage } from '../login/LoginPage';
 import { User, Users } from '../User_types';
 
@@ -75,7 +76,8 @@ export function MainPage() {
   if (user)
     return (
       <>
-        <ChatPage socket={socket} user={user} pChats={pChats} logout={logout} />
+        <ChatPage2 socket={socket} user={user} pChats={pChats} logout={logout} />
+        {/* <ChatPage socket={socket} user={user} pChats={pChats} logout={logout} /> */}
       </>
     );
   return (

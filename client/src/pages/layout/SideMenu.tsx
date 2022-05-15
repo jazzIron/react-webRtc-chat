@@ -48,6 +48,7 @@ const OnlineUserList = (
 const ChannelList = (chats: ActiveChannel[], setActiveChannel: any) => {
   console.log('[INFO] ChannelList ==============');
   console.log(chats);
+  if (chats.length <= 0) return false;
   return chats.map((chat) => (
     <div key={chat.name} onClick={() => setActiveChannel(chat.name)}>
       # {chat.name}
@@ -78,6 +79,10 @@ export function SideMenu({
   setActiveChannel,
   setActivePrivateChannel,
 }: propTypes) {
+  //const channelList = ChannelList(chats, setActiveChannel);
+
+  console.log(`=====================[INFO] SideMenu ================`);
+  console.log(chats);
   return (
     <SideMenuStyled>
       <div>로그인 정보 : {user.nickName}</div>
