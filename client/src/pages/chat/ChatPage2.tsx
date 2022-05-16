@@ -6,11 +6,32 @@ import { MessageContent } from './MessageContent';
 import { ActiveChannel, ChannelType, Messages } from './Chat_types';
 import { SocketMsgType } from '@src/utils/Constant';
 import { SideMenu } from '../layout/SideMenu';
+import { useSetRecoilState } from 'recoil';
+import { chatsState } from '@src/store/chatState';
 
-export function ChatPage2({ socket, user, users, pChats, setPChatItems, logout }: any) {
+interface AddTyping {
+  channel: ChannelType;
+  isTyping: boolean;
+  sender: string;
+}
+
+export function ChatPage2({ socket, user, users, chatss, pChats, logout }: any) {
+  const setChats = useSetRecoilState(chatsState);
+
+  useEffect(() => {
+    console.log(
+      '==========================ChatPage2 useEffect====================================',
+    );
+    socket.emit(SocketMsgType.INIT_CHATS, initChats);
+    socket.on(SocketMsgType.MESSAGE_SEND, addMessage);
+
+    socket.on(SocketMsgType.TYPING, addTyping);
+    socket.on(SocketMsgType.CREATE_CHANNEL, updateChats);
+  }, []);
+
   const [chatData, setChatData] = useState<{
     chats: any;
-    activeChannel: ActiveChannel;
+    activeChannel: any;
   }>({
     chats: [
       {
@@ -22,7 +43,7 @@ export function ChatPage2({ socket, user, users, pChats, setPChatItems, logout }
       },
     ],
     activeChannel: {
-      description: 'Public room!!',
+      description: 'Public room@@@@@',
       messages: [],
       msgCount: 0,
       name: 'Community',
@@ -32,28 +53,23 @@ export function ChatPage2({ socket, user, users, pChats, setPChatItems, logout }
 
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    socket.emit(SocketMsgType.INIT_CHATS, initChats);
-    socket.on(SocketMsgType.MESSAGE_SEND, addMessage);
-    socket.on(SocketMsgType.TYPING, addTyping);
-    socket.on(SocketMsgType.CREATE_CHANNEL, updateChats);
-  }, []);
-
   const initChats = (_chats: ActiveChannel[]) => {
-    console.log('initChats====================================');
+    console.log('==========================initChats====================================');
     console.log(_chats);
     updateChats(_chats, true);
   };
 
   const updateChats = (_chats: ActiveChannel[], init: boolean = false) => {
-    console.log(_chats);
-    console.log(init);
+    console.warn('========================== [INFO] updateChats ==========');
+    console.log(chatData);
+
     const { chats, activeChannel } = chatData;
     const newChats = init ? [..._chats] : [...chats, _chats];
 
-    console.warn('[INFO] updateChats ==========');
     console.log(newChats);
     console.log(init ? _chats[0] : activeChannel);
+
+    setChats(newChats);
 
     setChatData({
       chats: newChats,
@@ -64,29 +80,26 @@ export function ChatPage2({ socket, user, users, pChats, setPChatItems, logout }
   };
 
   const sendMsg = (msg: string) => {
+    console.log('========================== [INFO] sendMsg ==========');
+    console.log(chatData);
     const { activeChannel } = chatData;
     socket.emit(SocketMsgType.MESSAGE_SEND, { channel: activeChannel.name, msg });
   };
 
   const sendTyping = (isTyping: boolean) => {
+    console.log('========================== [INFO] sendTyping ==========');
+    console.log(chatData);
     const { activeChannel } = chatData;
     socket.emit(SocketMsgType.TYPING, { channel: activeChannel.name, isTyping });
   };
 
-  interface AddTyping {
-    channel: ChannelType;
-    isTyping: boolean;
-    sender: string;
-  }
-
   const addTyping = ({ channel, isTyping, sender }: AddTyping) => {
-    const { chats } = chatData;
-
-    console.log('=====================addTyping======================');
+    console.warn('=====================addTyping======================');
     console.log(chatData);
+    console.log(chatss);
 
     if (sender === user.nickName) return;
-    chats.map((chat: any) => {
+    chatData.chats.map((chat: any) => {
       if (chat.name === channel) {
         if (isTyping && !chat.typingUser.includes(sender)) {
           chat.typingUser.push(sender);
@@ -97,8 +110,8 @@ export function ChatPage2({ socket, user, users, pChats, setPChatItems, logout }
       return null;
     });
     setChatData({
-      activeChannel: chats[0],
-      chats: chats,
+      chats: chatData.chats,
+      activeChannel: chatData.chats[0],
     });
   };
 
@@ -108,6 +121,8 @@ export function ChatPage2({ socket, user, users, pChats, setPChatItems, logout }
   }
 
   const addMessage = ({ channel, message }: AddMessage) => {
+    console.log('=====================addMessage======================');
+    console.log(chatData);
     const { chats, activeChannel } = chatData;
     chats.map((chat: any) => {
       if (chat.name === channel) {

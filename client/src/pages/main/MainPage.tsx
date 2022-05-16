@@ -1,7 +1,9 @@
 import styled from '@emotion/styled';
 import useSocketIo from '@src/hooks/socketIo/useSocketIo';
+import { chatsState } from '@src/store/chatState';
 import { SocketMsgType } from '@src/utils/Constant';
 import { useEffect, useState } from 'react';
+import { useRecoilState } from 'recoil';
 import { PChat } from '../chat';
 import { ChatPage } from '../chat/ChatPage';
 import { ChatPage2 } from '../chat/ChatPage2';
@@ -14,6 +16,8 @@ export function MainPage() {
   const [pChats, setPChats] = useState<PChat[]>([]);
   const [loading, setLoading] = useState(true);
   const { socketRef, socket } = useSocketIo();
+
+  const [chatss, setChats] = useRecoilState(chatsState);
 
   const usersData =
     (isNewUsers: boolean) =>
@@ -36,11 +40,9 @@ export function MainPage() {
             return null;
           });
         setUsers(newUsers);
-        setPChats(newPChats);
       } else {
         const newPChats = pChats.filter((pChat) => pChat.name !== outUser);
         setUsers(newUsers);
-        setPChats(newPChats);
       }
     };
 
@@ -56,6 +58,7 @@ export function MainPage() {
   }, []);
 
   useEffect(() => {
+    console.log('==================MAIN_PAGE_ useEffect=================');
     if (socketRef.current) setLoading(false);
   }, [socketRef.current]);
 
@@ -73,10 +76,12 @@ export function MainPage() {
 
   if (loading) return <div>loading ...........</div>;
 
+  console.log('==================MAIN_PAGE=================');
+
   if (user)
     return (
       <>
-        <ChatPage2 socket={socket} user={user} pChats={pChats} logout={logout} />
+        <ChatPage2 socket={socket} user={user} chatss={chatss} pChats={pChats} logout={logout} />
         {/* <ChatPage socket={socket} user={user} pChats={pChats} logout={logout} /> */}
       </>
     );

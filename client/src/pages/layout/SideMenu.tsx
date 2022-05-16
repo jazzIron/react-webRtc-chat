@@ -63,6 +63,7 @@ const checkChannel = (isChannel: boolean) => {
 };
 
 const handleMakeChannel = (socket: any) => {
+  console.log('===================[INFO] handleMakeChannel=====================');
   const channelName = `CHANNEL_${Math.floor(Math.random() * 100)}`;
   const channelDescription = 'Common_Channel';
   socket.emit(SocketMsgType.CHECK_CHANNEL, { channelName, channelDescription }, checkChannel);
@@ -81,11 +82,16 @@ export function SideMenu({
 }: propTypes) {
   //const channelList = ChannelList(chats, setActiveChannel);
 
+  const checkChannelList = () => {
+    console.log('===================[INFO] checkChannelList=====================');
+    console.log(chats);
+  };
+
   console.log(`=====================[INFO] SideMenu ================`);
   console.log(chats);
   return (
     <SideMenuStyled>
-      <div>로그인 정보 : {user.nickName}</div>
+      <div onClick={checkChannelList}>로그인 정보 : {user.nickName}</div>
       <div onClick={onLogout}>로그아웃</div>
       <div onClick={() => handleMakeChannel(socket)}>채널 생성</div>
       <div>
