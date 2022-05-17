@@ -13,7 +13,7 @@ import { activeChannelState, Chat, chatsState } from '@src/store/chatState';
 interface propTypes {
   socket: any;
   user: User;
-  // users: Users;
+  users: Users;
   pChats: PChat[];
   logout: () => void;
 }
@@ -29,9 +29,20 @@ interface AddMessage {
   message: Messages;
 }
 
-export function ChatPage({ socket, user, pChats, logout }: propTypes) {
-  const [chats, setChats] = useRecoilState(chatsState);
-  const [activeChannel, setActiveChannel] = useRecoilState(activeChannelState);
+export function ChatPage({ socket, user, users, pChats, logout }: propTypes) {
+  // const [chats, setChats] = useRecoilState<Chat[]>(chatsState);
+  // const [activeChannel, setActiveChannel] = useRecoilState(activeChannelState);
+
+  const [chats, setChats] = useState<Chat[]>([
+    { description: 'Public room', messages: [], msgCount: 0, name: 'Community', typingUser: [] },
+  ]);
+  const [activeChannel, setActiveChannel] = useState<Chat>({
+    description: 'Public room',
+    messages: [],
+    msgCount: 0,
+    name: 'Community',
+    typingUser: [],
+  });
 
   useEffect(() => {
     socket.emit(SocketMsgType.INIT_CHATS, initChats);
@@ -49,9 +60,12 @@ export function ChatPage({ socket, user, pChats, logout }: propTypes) {
   };
 
   const updateChats = (_chats: Chat[], init: boolean = false) => {
-    const newChats: any[] = init ? [..._chats] : [...chats, _chats];
-    setChats(newChats);
-    setActiveChannel(init ? _chats[0] : activeChannel);
+    //const newChats: any[] = init ? [..._chats] : [...chats, _chats];
+    // setChats(newChats);
+    // setActiveChannel(init ? _chats[0] : activeChannel);
+
+    setChats((prev) => (init ? [..._chats] : [...prev, ..._chats]));
+    setActiveChannel((prev) => (init ? _chats[0] : prev));
   };
 
   const addTyping = ({ channel, isTyping, sender }: AddTyping) => {
@@ -117,8 +131,9 @@ export function ChatPage({ socket, user, pChats, logout }: propTypes) {
       }
       return null;
     });
-    setChats(chats);
-    setActiveChannel(chats[0]);
+
+    //setChats((prev) => [chats, ...prev]));
+    setActiveChannel((prev) => chats[0]);
   };
 
   const addPTyping = ({ channel, isTyping }: Omit<AddTyping, 'sender'>) => {
@@ -150,20 +165,20 @@ export function ChatPage({ socket, user, pChats, logout }: propTypes) {
     // });
   };
 
-  // const onActiveChannel = (name: string) => {
-  //   const newActiveChannel = chats.filter((chat) => chat.name === name);
-  //   newActiveChannel[0].msgCount = 0;
+  const onActiveChannel = (name: string) => {
+    const newActiveChannel = chats.filter((chat) => chat.name === name);
+    newActiveChannel[0].msgCount = 0;
 
-  //   console.log('[INFO] setActiveChannel *************************');
-  //   console.log(newActiveChannel);
-  //   setActiveChannel(newActiveChannel[0]);
-  // };
+    console.log('[INFO] setActiveChannel *************************');
+    console.log(newActiveChannel);
+    setActiveChannel(newActiveChannel[0]);
+  };
 
-  // const setActivePrivateChannel = (name: string) => {
-  //   const newActiveChannel = pChats.filter((pChat: any) => pChat.name === name);
-  //   newActiveChannel[0].msgCount = 0;
-  //   //setActiveChannel(newActiveChannel[0]);
-  // };
+  const setActivePrivateChannel = (name: string) => {
+    const newActiveChannel = pChats.filter((pChat: any) => pChat.name === name);
+    newActiveChannel[0].msgCount = 0;
+    //setActiveChannel(newActiveChannel[0]);
+  };
 
   console.log('=======================[INFO]ChatPage=======================');
   console.log(chats);
@@ -171,7 +186,7 @@ export function ChatPage({ socket, user, pChats, logout }: propTypes) {
 
   return (
     <ChatPageStyled>
-      {/* <SideMenu
+      <SideMenu
         socket={socket}
         user={user}
         users={users}
@@ -181,7 +196,7 @@ export function ChatPage({ socket, user, pChats, logout }: propTypes) {
         setActiveChannel={onActiveChannel}
         setActivePrivateChannel={setActivePrivateChannel}
         onLogout={logout}
-      /> */}
+      />
       {
         <>
           <MessageHeader activeChannel={activeChannel} />

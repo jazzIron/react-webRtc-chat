@@ -9,7 +9,7 @@ import { SideMenu } from '../layout/SideMenu';
 
 export function ChatPage2({ socket, user, users, pChats, setPChatItems, logout }: any) {
   const [chatData, setChatData] = useState<{
-    chats: any;
+    chats: any[];
     activeChannel: ActiveChannel;
   }>({
     chats: [
@@ -49,15 +49,17 @@ export function ChatPage2({ socket, user, users, pChats, setPChatItems, logout }
     console.log(_chats);
     console.log(init);
     const { chats, activeChannel } = chatData;
-    const newChats = init ? [..._chats] : [...chats, _chats];
+    //const newChats = init ? [..._chats] : [...chats, _chats];
 
     console.warn('[INFO] updateChats ==========');
-    console.log(newChats);
-    console.log(init ? _chats[0] : activeChannel);
+    //console.log(newChats);
+    //console.log(init ? _chats[0] : activeChannel);
 
-    setChatData({
-      chats: newChats,
-      activeChannel: init ? _chats[0] : activeChannel,
+    setChatData((prev) => {
+      return {
+        chats: init ? [..._chats] : [...prev.chats, _chats],
+        activeChannel: init ? _chats[0] : prev.activeChannel,
+      };
     });
 
     setLoading(false);
@@ -69,6 +71,8 @@ export function ChatPage2({ socket, user, users, pChats, setPChatItems, logout }
   };
 
   const sendTyping = (isTyping: boolean) => {
+    console.log('================== [INFO] sendTyping==================');
+    console.log(chatData);
     const { activeChannel } = chatData;
     socket.emit(SocketMsgType.TYPING, { channel: activeChannel.name, isTyping });
   };
@@ -96,10 +100,10 @@ export function ChatPage2({ socket, user, users, pChats, setPChatItems, logout }
       }
       return null;
     });
-    setChatData({
-      activeChannel: chats[0],
-      chats: chats,
-    });
+    // setChatData({
+    //   activeChannel: chats[0],
+    //   chats: chats,
+    // });
   };
 
   interface AddMessage {
@@ -116,9 +120,12 @@ export function ChatPage2({ socket, user, users, pChats, setPChatItems, logout }
       }
       return null;
     });
-    setChatData({
-      activeChannel: chats[0],
-      chats: chats,
+
+    setChatData((prev) => {
+      return {
+        chats: [chats, ...prev.chats],
+        activeChannel: chats[0],
+      };
     });
   };
 
