@@ -3,4 +3,5 @@ export enum RouteList {
   LOGIN = '/login',
   TEST = '/test',
   ROOM = '/room',
+  CHAT = '/chat',
 }

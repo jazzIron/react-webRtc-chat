@@ -4,7 +4,7 @@ import { RouteList } from './RouteList';
 import { MainPage } from '@src/pages/main';
 import { LoginPage } from '@src/pages/login/LoginPage';
 import { TestPage } from '@src/pages/test/TestPage';
-import { RoomPage } from '@src/pages/test';
+import { ChatPage, RoomPage } from '@src/pages/test';
 
 export function NormalRouter() {
   return (
@@ -14,6 +14,7 @@ export function NormalRouter() {
         <Route path={RouteList.LOGIN} element={<LoginPage />} />
         <Route path={RouteList.TEST} element={<TestPage />} />
         <Route path={RouteList.ROOM} element={<RoomPage />} />
+        <Route path={RouteList.CHAT} element={<ChatPage />} />
       </Routes>
     </BodyStyled>
   );

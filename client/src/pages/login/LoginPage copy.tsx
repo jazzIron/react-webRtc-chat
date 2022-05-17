@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { SocketMsgType } from '@src/utils/Constant';
 import { isEmpty } from 'lodash';
 import { MutableRefObject, useState } from 'react';
 import { Socket } from 'socket.io-client';
@@ -19,32 +20,28 @@ interface isUserCallback {
 
 export function LoginPage({ socket, setUser }: propTypes) {
   const [userData, setUserData] = useState<UserData>({
-    nickName: `USER_${Math.floor(Math.random() * 1000) + 1}`,
+    nickName: `USER_${Math.floor(Math.random() * 10000)}`,
     error: '',
   });
 
-  const loginSuccess = (user: User) => {
-    setUserData((prev) => {
-      return {
-        ...prev,
-        error: '',
-      };
-    });
-    setUser && setUser(user);
-  };
-
-  const loginFail = () => {
-    setUserData((prev) => {
-      return {
-        ...prev,
-        error: 'Already nickname',
-      };
-    });
-    return console.error('Already nickname');
-  };
-
   const isUserCallback = ({ user, isUser }: isUserCallback) => {
-    return isUser ? loginFail() : loginSuccess(user);
+    if (isUser) {
+      setUserData((prev) => {
+        return {
+          ...prev,
+          error: 'Already nickname',
+        };
+      });
+      return console.error('Already nickname');
+    } else {
+      setUserData((prev) => {
+        return {
+          ...prev,
+          error: '',
+        };
+      });
+      setUser && setUser(user);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,8 +57,9 @@ export function LoginPage({ socket, setUser }: propTypes) {
   const handleClickLoginSubmit = async () => {
     if (!socket) return false;
     if (!socket.current) return false;
+    // NOTE: TEST RANDOM USER NICKNAME
     if (isEmpty(userData.nickName)) return false;
-    socket.current.emit('LOGIN', userData.nickName, isUserCallback);
+    socket.current.emit(SocketMsgType.IS_USER, userData.nickName, isUserCallback);
   };
 
   return (

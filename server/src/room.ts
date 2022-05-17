@@ -1,7 +1,9 @@
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { SocketMsgType } from "./chat/Constant";
 const cors = require("cors");
+const { v4: uuidv4 } = require("uuid");
 
 const PORT = process.env.PORT || 8081;
 const app = express();
@@ -24,7 +26,62 @@ const duplicationCheckRoom = (roomName: string) => {
   return rooms.some((val) => val.roomName === roomName);
 };
 
+// 유저생성
+const createUser = (nickName: string, socketId: string) => ({
+  nickName,
+  socketId,
+});
+
+const createMessage = (message: string, sender: string) => {
+  return {
+    id: uuidv4,
+    time: new Date(Date.now()),
+    message,
+    sender,
+  };
+};
+
+const addUsers = (users: any, user: any) => {
+  users[user.nickName] = user;
+  return users;
+};
+
+interface User {
+  nickName: string;
+  socketId: string;
+}
+type Users = { [key: string]: User };
+const isUser = (users: Users, nickName: string) => {
+  return nickName in users;
+};
+
+let users: Users = {};
+const ROOM_COMMUNITY = "ROOM_COMMUNITY";
+
 io.on("connection", (socket) => {
+  //시작시 방생성하기
+
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+  });
+
+  socket.on("LOGIN", (nickName, isUserCallback) => {
+    isUser(users, nickName)
+      ? isUserCallback({ isUser: true, user: null })
+      : isUserCallback({
+          isUser: false,
+          user: createUser(nickName, socket.id),
+        });
+  });
+
+  socket.on("INIT_ROOM", (user) => {
+    console.log("[INFO] INIT_ROOM ");
+    users = addUsers(users, user);
+    socket.data.user = user;
+    socket.join(ROOM_COMMUNITY);
+    io.emit(SocketMsgType.NEW_USER, { newUsers: users });
+  });
+
   socket.on(
     "CREATE_ROOM",
     ({ roomName, roomPwd, roomMax }, createRoomCallback) => {
@@ -54,6 +111,10 @@ io.on("connection", (socket) => {
     socket.join(roomId);
     const userJoinThisRoom = rooms.filter((val) => val.userId !== userId);
     io.sockets.to(roomId).emit("NOTI_ROOM_USER", userJoinThisRoom);
+  });
+
+  socket.on("MESSAGE_SEND", ({ roomId, message }) => {
+    socket.to(roomId).emit("MESSAGE_SEND");
   });
 });
 

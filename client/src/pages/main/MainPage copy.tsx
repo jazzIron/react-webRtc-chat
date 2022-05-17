@@ -6,22 +6,50 @@ import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { PChat } from '../chat';
 import { ChatPage2 } from '../chat/ChatPage2';
-import { ChatPage3 } from '../chat/ChatPage3';
 import { LoginPage } from '../login/LoginPage';
 import { User, Users } from '../User_types';
 
 export function MainPage() {
   const [user, setUser] = useState<User>();
+  const [users, setUsers] = useState<Users>();
   const [pChats, setPChats] = useState<PChat[]>([]);
   const [loading, setLoading] = useState(true);
   const { socketRef, socket } = useSocketIo();
 
+  const [chatss, setChats] = useRecoilState(chatsState);
+
+  const usersData =
+    (isNewUsers: boolean) =>
+    ({ newUsers, outUser }: any) => {
+      if (isNewUsers) {
+        const newPChats = [...pChats];
+        const oldPChats = pChats.map((pChat) => pChat.name);
+        user &&
+          Object.keys(newUsers).map((newUser) => {
+            if (newUser !== user.nickName && !oldPChats.includes(newUser)) {
+              newPChats.push({
+                name: newUser,
+                description: 'directMsg',
+                messages: [],
+                isTyping: false,
+                msgCount: 0,
+                type: 'Private',
+              });
+            }
+            return null;
+          });
+        setUsers(newUsers);
+      } else {
+        const newPChats = pChats.filter((pChat) => pChat.name !== outUser);
+        setUsers(newUsers);
+      }
+    };
+
   const initSocket = () => {
     if (!socketRef.current) return false;
     socketRef.current.on('connect', () => console.log('Connected'));
-    socketRef.current.on(SocketMsgType.NEW_USER, () => {
-      console.log('==================[INFO] NEW_USER================');
-    });
+    socketRef.current.on(SocketMsgType.LOGOUT, usersData(false));
+    socketRef.current.on(SocketMsgType.NEW_USER, usersData(true));
   };
 
   useEffect(() => {
@@ -52,12 +80,13 @@ export function MainPage() {
   if (user)
     return (
       <>
-        <ChatPage3 socket={socketRef} user={user} logout={logout} />
+        <ChatPage2 socket={socket} user={user} chatss={chatss} pChats={pChats} logout={logout} />
+        {/* <ChatPage socket={socket} user={user} pChats={pChats} logout={logout} /> */}
       </>
     );
   return (
     <MainPageStyled>
-      <LoginPage socket={socketRef} setUser={handleSetUser} />
+      {/* <LoginPage socket={socketRef} setUser={handleSetUser} /> */}
     </MainPageStyled>
   );
 }
