@@ -23,11 +23,14 @@ interface Rooms {
 
 let users: Users = {};
 const ROOM_COMMUNITY = "ROOM_COMMUNITY";
-const rooms: Rooms[] = [];
+// const rooms: Rooms[] = [];
 
-const duplicationCheckRoom = (roomName: string) => {
-  return rooms.some((val) => val.roomName === roomName);
-};
+const rooms = io.of("/").adapter.rooms;
+const sids = io.of("/").adapter.sids;
+
+// const duplicationCheckRoom = (roomName: string) => {
+//   return rooms.some((val) => val.roomName === roomName);
+// };
 
 // 유저생성
 const createUser = (nickName: string, socketId: string) => ({
@@ -35,8 +38,9 @@ const createUser = (nickName: string, socketId: string) => ({
   socketId,
 });
 
-const createMessage = (message: string, sender: string) => {
+const createMessage = (type: string, message: string, sender: string) => {
   return {
+    type,
     id: uuidv4(),
     time: new Date(Date.now()),
     message,
@@ -48,6 +52,23 @@ const addUsers = (users: any, user: any) => {
   users[user.nickName] = user;
   return users;
 };
+
+function getActiveRooms(io: Server) {
+  const arr = Array.from(io.sockets.adapter.rooms);
+  const rooms = arr.filter((room: any) => !room[1].has(room[0]));
+  console.log(rooms);
+  const activeRoom = rooms.map((i: any) => i[0]);
+  return activeRoom;
+}
+
+function getRooms(io: Server) {
+  const adapter = io.sockets.adapter.rooms;
+  const arr = Array.from(adapter);
+
+  console.log(arr);
+  const rooms = arr.filter((room: any) => !room[1].has(room[0]));
+  return rooms;
+}
 
 interface User {
   nickName: string;
@@ -78,12 +99,14 @@ io.on("connection", (socket) => {
     users = addUsers(users, user);
     socket.data.user = user;
     socket.join(ROOM_COMMUNITY);
-    io.emit(SocketMsgType.NEW_USER, { newUsers: users });
+    const msg = `[알림] ${user.nickName}님이 방에 입장하셨습니다. 환영합니다.`;
+    const message = createMessage("NEW_USER", msg, socket.data.user.nickName);
+    io.emit(SocketMsgType.NEW_USER, { newUser: user, users: users, message });
   });
 
-  socket.on("MESSAGE_SEND", ({ roomId, msg }) => {
+  socket.on("MESSAGE_SEND", ({ roomId, type, msg }) => {
     console.log(`===============[INFO] MESSAGE_SEND===============`);
-    const message = createMessage(msg, socket.data.user.nickName);
+    const message = createMessage(type, msg, socket.data.user.nickName);
     console.log(message);
     io.sockets.in(roomId).emit("MESSAGE_SEND", { roomId, message });
   });
@@ -100,7 +123,14 @@ io.on("connection", (socket) => {
 
   socket.on("ROOM_LIST", (roomListCallback) => {
     console.log(`===============[INFO] ROOM_LIST===============`);
-    console.log(rooms);
+    // const roomList = getRooms(io);
+    // const activeRoom = getActiveRooms(io);
+    // console.log(roomList);
+    // console.log(activeRoom);
+
+    console.log(io.sockets.adapter.rooms);
+    console.log(socket.rooms);
+
     io.emit("ROOM_LIST", roomListCallback(rooms));
   });
 

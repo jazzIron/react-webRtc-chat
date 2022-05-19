@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { useEffect, useState } from 'react';
+import { User, Users } from '../User_types';
 import { MessageInput } from './MessageInput';
 
 interface Message {
@@ -19,6 +20,17 @@ export function ChatPage3({ socket, user, users, logout }: any) {
     console.log(
       '==========================ChatPage2 useEffect====================================',
     );
+    socket.current.on(
+      'NEW_USER',
+      ({ newUser, users, message }: { newUser: User; users: Users; message: Message }) => {
+        console.log('==================[INFO] NEW_USER================');
+        console.log(newUser);
+        console.log(users);
+        setMessageList((prev) => {
+          return [...prev, message];
+        });
+      },
+    );
     socket.current.emit('INIT_ROOM', user);
     socket.current.on('TYPING', addTyping);
     socket.current.on('MESSAGE_SEND', addMessage);
@@ -35,7 +47,7 @@ export function ChatPage3({ socket, user, users, logout }: any) {
 
   const sendMsg = (msg: string) => {
     console.log('========================== [INFO] sendMsg ==========');
-    socket.current.emit('MESSAGE_SEND', { roomId: 'ROOM_COMMUNITY', msg });
+    socket.current.emit('MESSAGE_SEND', { roomId: 'ROOM_COMMUNITY', type: 'BASIC', msg });
   };
 
   const sendTyping = (isTyping: boolean) => {
@@ -50,13 +62,17 @@ export function ChatPage3({ socket, user, users, logout }: any) {
     });
   };
 
+  console.log(messageList);
+
   return (
     <ChatPageStyled>
       <MessageInput sendMsg={sendMsg} sendTyping={sendTyping} />
-      {typingUser && <div>유저 타이핑중.....</div>}
+      {typingUser && <div style={{ color: 'red', fontSize: '18px' }}>유저 타이핑중.....</div>}
       {messageList &&
         messageList.map((v: any) => {
-          return (
+          return v.type === 'NEW_USER' ? (
+            <div>{v.message}</div>
+          ) : (
             <>
               <div>{v.message}</div>
               <div>{v.sender}</div>

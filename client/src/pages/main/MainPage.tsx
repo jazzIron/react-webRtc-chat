@@ -19,8 +19,8 @@ export function MainPage() {
   const initSocket = () => {
     if (!socketRef.current) return false;
     socketRef.current.on('connect', () => console.log('Connected'));
-    socketRef.current.on(SocketMsgType.NEW_USER, () => {
-      console.log('==================[INFO] NEW_USER================');
+    socketRef.current.on('ROOM_LIST', (rooms) => {
+      console.log(rooms);
     });
   };
 
