@@ -1,14 +1,11 @@
 import styled from '@emotion/styled';
+import { User } from '@src/@types/User_types';
+import { PChat } from '@src/features/chat';
 import useSocketIo from '@src/hooks/socketIo/useSocketIo';
-import { chatsState } from '@src/store/chatState';
 import { SocketMsgType } from '@src/utils/Constant';
-import { useEffect, useState } from 'react';
-import { useRecoilState } from 'recoil';
-import { PChat } from '../chat';
-import { ChatPage2 } from '../chat/ChatPage2';
-import { ChatPage3 } from '../chat/ChatPage3';
+import { useState, useEffect } from 'react';
+import { ChatPage } from '../chat/ChatPage';
 import { LoginPage } from '../login/LoginPage';
-import { User, Users } from '../User_types';
 
 export function MainPage() {
   const [user, setUser] = useState<User>();
@@ -49,12 +46,7 @@ export function MainPage() {
 
   console.log('==================MAIN_PAGE=================');
 
-  if (user)
-    return (
-      <>
-        <ChatPage3 socket={socketRef} user={user} logout={logout} />
-      </>
-    );
+  if (user) return <ChatPage socket={socketRef} user={user} logout={logout} />;
   return (
     <MainPageStyled>
       <LoginPage socket={socketRef} setUser={handleSetUser} />

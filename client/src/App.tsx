@@ -1,6 +1,7 @@
 import { ReactElement } from 'react';
 import { ThemeProvider } from '@emotion/react';
 import { RecoilRoot } from 'recoil';
+import 'antd/dist/antd.min.css';
 import './App.scss';
 import { RouterManager } from './routes/RouterManager';
 

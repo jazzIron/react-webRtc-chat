@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import { useEffect, useState } from 'react';
-import { User, Users } from '../User_types';
+import { User, Users } from '@src/@types/User_types';
+import { useState, useEffect } from 'react';
 import { MessageInput } from './MessageInput';
 
 interface Message {
@@ -10,7 +10,7 @@ interface Message {
   sender: string;
 }
 
-export function ChatPage3({ socket, user, users, logout }: any) {
+export function Chat({ socket, user, logout }: any) {
   const [typingUser, setTypingUser] = useState(false);
   const [messageList, setMessageList] = useState<Message[]>([]);
 
@@ -62,10 +62,8 @@ export function ChatPage3({ socket, user, users, logout }: any) {
     });
   };
 
-  console.log(messageList);
-
   return (
-    <ChatPageStyled>
+    <ChatStyled>
       <MessageInput sendMsg={sendMsg} sendTyping={sendTyping} />
       {typingUser && <div style={{ color: 'red', fontSize: '18px' }}>유저 타이핑중.....</div>}
       {messageList &&
@@ -80,8 +78,8 @@ export function ChatPage3({ socket, user, users, logout }: any) {
             </>
           );
         })}
-    </ChatPageStyled>
+    </ChatStyled>
   );
 }
 
-const ChatPageStyled = styled.div``;
+const ChatStyled = styled.div``;

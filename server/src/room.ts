@@ -4,7 +4,7 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { SocketMsgType } from "./chat/Constant";
 const cors = require("cors");
-const { v4: uuidv4 } = require("uuid");
+const uuid = require("uuid");
 
 const PORT = process.env.PORT || 8081;
 const app = express();
@@ -41,7 +41,7 @@ const createUser = (nickName: string, socketId: string) => ({
 const createMessage = (type: string, message: string, sender: string) => {
   return {
     type,
-    id: uuidv4(),
+    id: uuid.v4(),
     time: new Date(Date.now()),
     message,
     sender,
@@ -121,7 +121,7 @@ io.on("connection", (socket) => {
       .emit("TYPING", { roomId, isTyping, sender: socket.data.user.nickName });
   });
 
-  socket.on("ROOM_LIST", (roomListCallback) => {
+  socket.on("ROOM_LIST", async (roomListCallback) => {
     console.log(`===============[INFO] ROOM_LIST===============`);
     // const roomList = getRooms(io);
     // const activeRoom = getActiveRooms(io);
@@ -129,7 +129,12 @@ io.on("connection", (socket) => {
     // console.log(activeRoom);
 
     console.log(io.sockets.adapter.rooms);
+    console.log("=============================");
     console.log(socket.rooms);
+    console.log("=============================");
+    const sockets = await io.in(socket.id).fetchSockets();
+
+    console.log(sockets);
 
     io.emit("ROOM_LIST", roomListCallback(rooms));
   });

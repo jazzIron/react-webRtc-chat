@@ -14,5 +14,5 @@ export interface UsersData {
 
 export interface UserData {
   nickName: string;
-  error: string;
+  error: boolean;
 }
