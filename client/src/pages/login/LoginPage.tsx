@@ -17,4 +17,12 @@ export function LoginPage({ socket, setUser }: propTypes) {
   );
 }
 
-const LoginPageStyled = styled.div``;
+const LoginPageStyled = styled.div`
+  background-color: #dcdcdc;
+  width: 100%;
+  height: 100vh;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;

@@ -1,9 +1,10 @@
 import styled from '@emotion/styled';
 import { UserData, User } from '@src/@types/User_types';
-import { Button, Card, Form, Input, message } from 'antd';
-import Meta from 'antd/lib/card/Meta';
+import { Button, Card, Form, Input, message, Typography } from 'antd';
+const { Text, Title } = Typography;
 import { MutableRefObject, useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
+import loginBannerImg from '../../asset/images/Chat_Flatline_b.svg';
 
 interface propTypes {
   socket?: MutableRefObject<Socket | undefined>;
@@ -74,17 +75,15 @@ export function Login({ socket, setUser }: propTypes) {
   };
 
   return (
-    <LoginStyled>
-      <Card
-        style={{ width: 500, backgroundColor: '#fff' }}
-        cover={
-          <img
-            alt="loginBanner"
-            src="https://png.pngtree.com/png-vector/20190401/ourlarge/pngtree-paper-plane-icon-design--essential-icon-vector-design-png-image_902861.jpg"
-          />
-        }
-      >
-        <Meta title="Simple Chat" />
+    <LoginWrapper>
+      <ImageWrapper>
+        <img alt="loginBanner" src={loginBannerImg} />
+      </ImageWrapper>
+
+      <LoginFormWrapper>
+        <Title level={2}>Simple Chat</Title>
+
+        {/* 
         <Form name="basic" form={form} autoComplete="off">
           <Form.Item
             label="닉네임"
@@ -104,15 +103,24 @@ export function Login({ socket, setUser }: propTypes) {
               로그인
             </Button>
           </Form.Item>
-        </Form>
-      </Card>
-    </LoginStyled>
+        </Form> */}
+      </LoginFormWrapper>
+    </LoginWrapper>
   );
 }
 
-const LoginStyled = styled.div`
-  width: 100%;
+const LoginWrapper = styled.div`
+  background-color: #2653ff;
+  min-width: 1200px;
+  min-height: 600px;
   display: flex;
-  align-items: center;
-  justify-content: center;
 `;
+
+const ImageWrapper = styled.div`
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  background-color: #fff;
+`;
+
+const LoginFormWrapper = styled.div``;

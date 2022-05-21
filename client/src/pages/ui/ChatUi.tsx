@@ -1,26 +1,48 @@
 import styled from '@emotion/styled';
-import { Avatar, Button, PageHeader, Tooltip, Comment, Badge, Space, Divider } from 'antd';
-import { PhoneOutlined, RedditOutlined, UserOutlined } from '@ant-design/icons';
+import { Avatar, Button, PageHeader, Tooltip, Comment, Badge, Space, Divider, Input } from 'antd';
+import { InfoCircleOutlined, PhoneOutlined, RedditOutlined, UserOutlined } from '@ant-design/icons';
 import moment from 'moment';
+
+import { GrSend } from 'react-icons/gr';
+import { RiEmotionHappyLine } from 'react-icons/ri';
+import { css, keyframes } from '@emotion/react';
+import { useState, useEffect } from 'react';
 
 const AVATAR_IMG = 'https://blog.kakaocdn.net/dn/qLIlw/btqSDtQEGFg/Ru1mm2rSUISCftBjBOHfs1/img.jpg';
 
 const ChatRoomHeader = () => {
-  <Badge dot>
-    <Avatar shape="square" src={AVATAR_IMG} alt="Han Solo" />
-  </Badge>;
+  const ChatRoomHeaderWrapper = styled.div`
+    box-sizing: border-box;
+    margin: 0;
+    color: rgba(0, 0, 0, 0.85);
+    font-size: 14px;
+    line-height: 1.5715;
+    list-style: none;
+    position: relative;
+    padding: 16px 24px;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  `;
+
+  const UserWrapper = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  `;
 
   return (
-    <PageHeader
-      title={
+    <ChatRoomHeaderWrapper>
+      <UserWrapper>
         <Badge dot color="green">
-          이재철
+          <Avatar shape="square" src={AVATAR_IMG} alt="Han Solo" />
         </Badge>
-      }
-      className="site-page-header"
-      avatar={{ src: AVATAR_IMG, shape: 'square', size: 'large' }}
-      extra={[<PhoneOutlined />]}
-    ></PageHeader>
+        <p>이재철</p>
+      </UserWrapper>
+
+      <PhoneOutlined />
+    </ChatRoomHeaderWrapper>
   );
 };
 
@@ -59,6 +81,62 @@ const ChatMessageNewUser = ({ nickName }: { nickName: string }) => {
   return <Divider plain>{newUserMessage}</Divider>;
 };
 
+const ChatTypingMessage = ({ nickNames }: { nickNames: string[] }) => {
+  const typingGroup = nickNames.join(', ');
+
+  const bounce = keyframes`
+  from, 20%, 53%, 80%, to {
+    transform: translate3d(0,0,0);
+  }
+
+  40%, 43% {
+    transform: translate3d(0, -8px, 0);
+  }
+
+  70% {
+    transform: translate3d(0, -5px, 0);
+  }
+
+  90% {
+    transform: translate3d(0,-4px,0);
+  }
+`;
+
+  const ChatTypingMessage = styled.div`
+    color: #bfbfbf;
+    animation: ${bounce} 1s ease infinite;
+  `;
+  return <ChatTypingMessage>{typingGroup} 입력중...</ChatTypingMessage>;
+};
+
+const ChatMessageInput = () => {
+  const MessageInputItemWrapper = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    & svg {
+      width: 20px;
+      height: 20px;
+    }
+  `;
+
+  const handleClick = () => {
+    console.log('handleClick=============');
+  };
+  return (
+    <Input
+      size="large"
+      placeholder="메세지를 입력해주세요"
+      suffix={
+        <MessageInputItemWrapper>
+          <RiEmotionHappyLine />
+          <GrSend onClick={handleClick} />
+        </MessageInputItemWrapper>
+      }
+    />
+  );
+};
+
 export function ChatUi() {
   return (
     <>
@@ -70,14 +148,14 @@ export function ChatUi() {
           <ChatMessageNewUser nickName={'테스터2'} />
           <ChatContents nickName="테스터2" />
           <ChatContents nickName="테스터2" />
-          <ChatContents nickName="테스터2" />
-          <ChatContents nickName="테스터2" />
-          <ChatContents nickName="테스터2" />
           <ChatMessageNewUser nickName={'테스터3'} />
           <ChatContents nickName="테스터3" />
           <ChatContents nickName="테스터3" />
-          <ChatContents nickName="테스터1" />
+          <ChatContents nickName="테스터3" />
+          <ChatContents nickName="테스터3" />
         </ChatContentWrapper>
+        <ChatTypingMessage nickNames={['테스터1', '테스터2']} />
+        <ChatMessageInput />
       </ChatUiStyled>
     </>
   );
@@ -85,11 +163,11 @@ export function ChatUi() {
 
 const ChatUiStyled = styled.div`
   width: 100%;
-  height: 700px;
-  overflow-x: hidden;
-  overflow-y: auto;
 `;
 
 const ChatContentWrapper = styled.div`
-  padding: 0px 20px;
+  padding: 10px 20px 20px 20px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 700px;
 `;
