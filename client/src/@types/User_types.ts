@@ -1,5 +1,6 @@
 export interface User {
   nickName: string;
+  userAvatar: string;
   socketId: string;
 }
 
@@ -14,5 +15,6 @@ export interface UsersData {
 
 export interface UserData {
   nickName: string;
+  userAvatar: string;
   error: boolean;
 }

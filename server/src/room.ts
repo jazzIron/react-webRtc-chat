@@ -33,8 +33,9 @@ const sids = io.of("/").adapter.sids;
 // };
 
 // 유저생성
-const createUser = (nickName: string, socketId: string) => ({
-  nickName,
+const createUser = (user: User, socketId: string) => ({
+  nickName: user.nickName,
+  userAvatar: user.userAvatar,
   socketId,
 });
 
@@ -72,6 +73,7 @@ function getRooms(io: Server) {
 
 interface User {
   nickName: string;
+  userAvatar: string;
   socketId: string;
 }
 type Users = { [key: string]: User };
@@ -85,12 +87,12 @@ io.on("connection", (socket) => {
     console.log("user disconnected");
   });
 
-  socket.on("LOGIN", (nickName, isUserCallback) => {
-    isUser(users, nickName)
+  socket.on("LOGIN", (user, isUserCallback) => {
+    isUser(users, user.nickName)
       ? isUserCallback({ isUser: true, user: null })
       : isUserCallback({
           isUser: false,
-          user: createUser(nickName, socket.id),
+          user: createUser(user, socket.id),
         });
   });
 
