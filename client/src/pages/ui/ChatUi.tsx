@@ -1,12 +1,11 @@
 import styled from '@emotion/styled';
 import { Avatar, Button, PageHeader, Tooltip, Comment, Badge, Space, Divider, Input } from 'antd';
-import { InfoCircleOutlined, PhoneOutlined, RedditOutlined, UserOutlined } from '@ant-design/icons';
+import { PhoneOutlined } from '@ant-design/icons';
 import moment from 'moment';
 
 import { GrSend } from 'react-icons/gr';
 import { RiEmotionHappyLine } from 'react-icons/ri';
 import { css, keyframes } from '@emotion/react';
-import { useState, useEffect } from 'react';
 
 const AVATAR_IMG = 'https://blog.kakaocdn.net/dn/qLIlw/btqSDtQEGFg/Ru1mm2rSUISCftBjBOHfs1/img.jpg';
 
@@ -55,7 +54,6 @@ const ChatContents = ({
   message?: string;
   time?: Date;
 }) => {
-  //TODO: 이전 메세지를 확인해서 같은 사람이면 아래에 붙이기
   return (
     <Comment
       author={<a>{nickName}</a>}

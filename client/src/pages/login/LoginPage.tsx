@@ -18,7 +18,7 @@ export function LoginPage({ socket, setUser }: propTypes) {
 }
 
 const LoginPageStyled = styled.div`
-  background-color: #dcdcdc;
+  background-color: #0051b8;
   width: 100%;
   height: 100vh;
   display: flex;

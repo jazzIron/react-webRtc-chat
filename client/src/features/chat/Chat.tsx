@@ -1,13 +1,18 @@
 import styled from '@emotion/styled';
 import { User, Users } from '@src/@types/User_types';
 import { useState, useEffect } from 'react';
-import { MessageInput } from './MessageInput';
+import { ChatContents } from './ChatContents';
+import { ChatMessageInput, ChatTypingMessage } from './ChatMessageInput';
+import { ChatRoomHeader } from './ChatRoomHeader';
+
+type MessageType = 'NEW_USER' | 'DEFAULT';
 
 interface Message {
+  type: MessageType;
   id: string;
   time: Date;
   message: string;
-  sender: string;
+  sender: User;
 }
 
 export function Chat({ socket, user, logout }: any) {
@@ -26,6 +31,7 @@ export function Chat({ socket, user, logout }: any) {
         console.log('==================[INFO] NEW_USER================');
         console.log(newUser);
         console.log(users);
+        console.log(message);
         setMessageList((prev) => {
           return [...prev, message];
         });
@@ -61,24 +67,14 @@ export function Chat({ socket, user, logout }: any) {
       return [...prev, message];
     });
   };
-
   return (
-    <ChatStyled>
-      <MessageInput sendMsg={sendMsg} sendTyping={sendTyping} />
-      {typingUser && <div style={{ color: 'red', fontSize: '18px' }}>유저 타이핑중.....</div>}
-      {messageList &&
-        messageList.map((v: any) => {
-          return v.type === 'NEW_USER' ? (
-            <div>{v.message}</div>
-          ) : (
-            <>
-              <div>{v.message}</div>
-              <div>{v.sender}</div>
-              <div>{v.time}</div>
-            </>
-          );
-        })}
-    </ChatStyled>
+    <>
+      <ChatRoomHeader user={user} />
+      <ChatStyled>
+        <ChatContents messages={messageList} typingUser={typingUser} />
+        <ChatMessageInput sendMsg={sendMsg} sendTyping={sendTyping} />
+      </ChatStyled>
+    </>
   );
 }
 

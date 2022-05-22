@@ -39,7 +39,7 @@ const createUser = (user: User, socketId: string) => ({
   socketId,
 });
 
-const createMessage = (type: string, message: string, sender: string) => {
+const ChatTypingMessage = (type: string, message: string, sender: User) => {
   return {
     type,
     id: uuid.v4(),
@@ -48,6 +48,14 @@ const createMessage = (type: string, message: string, sender: string) => {
     sender,
   };
 };
+
+export const createMessage = (type: string, message: any, sender: User) => ({
+  type,
+  id: uuid.v4(),
+  time: new Date(Date.now()),
+  message,
+  sender,
+});
 
 const addUsers = (users: any, user: any) => {
   users[user.nickName] = user;
@@ -102,14 +110,13 @@ io.on("connection", (socket) => {
     socket.data.user = user;
     socket.join(ROOM_COMMUNITY);
     const msg = `[알림] ${user.nickName}님이 방에 입장하셨습니다. 환영합니다.`;
-    const message = createMessage("NEW_USER", msg, socket.data.user.nickName);
+    const message = ChatTypingMessage("NEW_USER", msg, user);
     io.emit(SocketMsgType.NEW_USER, { newUser: user, users: users, message });
   });
 
   socket.on("MESSAGE_SEND", ({ roomId, type, msg }) => {
     console.log(`===============[INFO] MESSAGE_SEND===============`);
-    const message = createMessage(type, msg, socket.data.user.nickName);
-    console.log(message);
+    const message = createMessage(type, msg, socket.data.user);
     io.sockets.in(roomId).emit("MESSAGE_SEND", { roomId, message });
   });
 
@@ -120,7 +127,7 @@ io.on("connection", (socket) => {
     console.log(socket.data.user);
     socket.broadcast
       .to(roomId)
-      .emit("TYPING", { roomId, isTyping, sender: socket.data.user.nickName });
+      .emit("TYPING", { roomId, isTyping, sender: socket.data.user });
   });
 
   socket.on("ROOM_LIST", async (roomListCallback) => {
