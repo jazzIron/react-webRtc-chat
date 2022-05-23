@@ -15,7 +15,7 @@ interface Message {
   sender: User;
 }
 
-export function Chat({ socket, user, logout }: any) {
+export function Chat({ socket, user, logout, updateUsers }: any) {
   const [typingUser, setTypingUser] = useState(false);
   const [messageList, setMessageList] = useState<Message[]>([]);
 
@@ -32,6 +32,7 @@ export function Chat({ socket, user, logout }: any) {
         console.log(newUser);
         console.log(users);
         console.log(message);
+        updateUsers(users);
         setMessageList((prev) => {
           return [...prev, message];
         });

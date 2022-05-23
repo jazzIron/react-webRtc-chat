@@ -89,6 +89,7 @@ const ChatContentWrapper = styled.div`
   overflow-x: hidden;
   overflow-y: auto;
   height: calc(100vh - 64px - 60px);
+  background: #fff;
 `;
 
 const ChatMessageWrapper = styled.div``;

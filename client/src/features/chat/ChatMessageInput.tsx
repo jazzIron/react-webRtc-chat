@@ -85,6 +85,7 @@ export function ChatMessageInput({ sendMsg, sendTyping }: propTypes) {
 const ChatMessageInputStyled = styled.div`
   padding: 10px 20px 10px 20px;
   min-height: 60px;
+  background: #fff;
 `;
 
 const MessageInputItemWrapper = styled.div`
