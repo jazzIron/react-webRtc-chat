@@ -2,8 +2,10 @@ import styled from '@emotion/styled';
 import { User, Users } from '@src/@types/User_types';
 import { useState, useEffect } from 'react';
 import { ChatContents } from './ChatContents';
-import { ChatMessageInput, ChatTypingMessage } from './ChatMessageInput';
+import { ChatMessageInput } from './ChatMessageInput';
 import { ChatRoomHeader } from './ChatRoomHeader';
+import { useRecoilState } from 'recoil';
+import { usersState } from '@src/store/userState';
 
 type MessageType = 'NEW_USER' | 'DEFAULT';
 
@@ -18,8 +20,9 @@ interface Message {
 export function Chat({ socket, user, logout, updateUsers }: any) {
   const [typingUser, setTypingUser] = useState(false);
   const [messageList, setMessageList] = useState<Message[]>([]);
+  const [users, setUsers] = useRecoilState(usersState);
 
-  console.log(user);
+  console.log(users);
 
   useEffect(() => {
     console.log(
@@ -33,6 +36,7 @@ export function Chat({ socket, user, logout, updateUsers }: any) {
         console.log(users);
         console.log(message);
         updateUsers(users);
+        setUsers(users.users);
         setMessageList((prev) => {
           return [...prev, message];
         });

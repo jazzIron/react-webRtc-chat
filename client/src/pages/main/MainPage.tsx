@@ -2,16 +2,19 @@ import styled from '@emotion/styled';
 import { User } from '@src/@types/User_types';
 import { PChat } from '@src/features/chat';
 import useSocketIo from '@src/hooks/socketIo/useSocketIo';
+import { loginUserState } from '@src/store/userState';
 import { SocketMsgType } from '@src/utils/Constant';
+import { isEmpty } from 'lodash';
 import { useState, useEffect } from 'react';
+import { useRecoilState, useResetRecoilState } from 'recoil';
 import { ChatPage } from '../chat/ChatPage';
 import { LoginPage } from '../login/LoginPage';
 
 export function MainPage() {
-  const [user, setUser] = useState<User>();
-  const [pChats, setPChats] = useState<PChat[]>([]);
   const [loading, setLoading] = useState(true);
   const { socketRef, socket } = useSocketIo();
+  const [loginUser, setLoginUser] = useRecoilState(loginUserState);
+  const resetLoginUser = useResetRecoilState(loginUserState);
 
   const initSocket = () => {
     if (!socketRef.current) return false;
@@ -30,26 +33,21 @@ export function MainPage() {
     if (socketRef.current) setLoading(false);
   }, [socketRef.current]);
 
-  const handleSetUser = (user: User) => {
-    if (!socketRef.current) return false;
-    setUser(user);
-    socketRef.current.emit(SocketMsgType.NEW_USER, user);
-  };
-
   const logout = () => {
     if (!socketRef.current) return false;
     socketRef.current.emit(SocketMsgType.LOGOUT);
-    setUser(undefined);
+    resetLoginUser();
   };
 
   if (loading) return <div>loading ...........</div>;
 
   console.log('==================MAIN_PAGE=================');
 
-  if (user) return <ChatPage socket={socketRef} user={user} logout={logout} />;
+  if (!isEmpty(loginUser.socketId))
+    return <ChatPage socket={socketRef} user={loginUser} logout={logout} />;
   return (
     <MainPageStyled>
-      <LoginPage socket={socketRef} setUser={handleSetUser} />
+      <LoginPage socket={socketRef} />
     </MainPageStyled>
   );
 }

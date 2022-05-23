@@ -1,16 +1,17 @@
 import styled from '@emotion/styled';
 import { UserData, User } from '@src/@types/User_types';
 import { AVATAR_LIST } from '@src/components/image/avatarList';
+import { loginUserState } from '@src/store/userState';
 import { Avatar, Button, Form, Input, message, Select, Typography, Image, Space } from 'antd';
 const { Text, Title } = Typography;
 import { MutableRefObject, useEffect, useState } from 'react';
+import { useRecoilState } from 'recoil';
 import { Socket } from 'socket.io-client';
 import loginBannerImg from '../../asset/images/Chat_Flatline_b.svg';
 
 const { Option } = Select;
 interface propTypes {
   socket?: MutableRefObject<Socket | undefined>;
-  setUser?: (user: User) => void;
 }
 
 interface isUserCallback {
@@ -22,14 +23,15 @@ interface isUserCallback {
   isUser: boolean;
 }
 
-export function Login({ socket, setUser }: propTypes) {
+export function Login({ socket }: propTypes) {
   const [form] = Form.useForm();
   const [userData, setUserData] = useState<UserData>({
     nickName: `USER_${Math.floor(Math.random() * 1000) + 1}`,
     userAvatar: 'captainAmerica01',
-    //nickName: ``,
     error: false,
   });
+
+  const [loginUser, setLoginUser] = useRecoilState(loginUserState);
 
   const loginSuccess = (user: User) => {
     setUserData((prev) => {
@@ -38,7 +40,7 @@ export function Login({ socket, setUser }: propTypes) {
         error: true,
       };
     });
-    setUser && setUser(user);
+    setLoginUser(user);
   };
 
   const loginFail = () => {

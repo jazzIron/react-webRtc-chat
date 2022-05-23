@@ -6,13 +6,12 @@ import { Socket } from 'socket.io-client';
 
 interface propTypes {
   socket?: MutableRefObject<Socket | undefined>;
-  setUser?: (user: User) => void;
 }
 
-export function LoginPage({ socket, setUser }: propTypes) {
+export function LoginPage({ socket }: propTypes) {
   return (
     <LoginPageStyled>
-      <Login socket={socket} setUser={setUser} />
+      <Login socket={socket} />
     </LoginPageStyled>
   );
 }
