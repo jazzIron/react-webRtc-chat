@@ -82,6 +82,7 @@ export function ChatContents({ messages, typingUser }: propTypes) {
 
 const ChatContentStyled = styled.div`
   width: 100%;
+  background: #fff;
 `;
 const ChatContentWrapper = styled.div`
   position: relative;
@@ -89,7 +90,6 @@ const ChatContentWrapper = styled.div`
   overflow-x: hidden;
   overflow-y: auto;
   height: calc(100vh - 64px - 60px);
-  background: #fff;
 `;
 
 const ChatMessageWrapper = styled.div``;

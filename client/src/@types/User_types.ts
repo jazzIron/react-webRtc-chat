@@ -5,7 +5,7 @@ export interface User {
 }
 
 export interface Users {
-  users: { [key: string]: User };
+  users: User[];
 }
 
 export interface UsersData {

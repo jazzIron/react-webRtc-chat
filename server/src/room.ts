@@ -12,6 +12,18 @@ app.use(cors());
 const httpServer = createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });
 
+interface User {
+  nickName: string;
+  userAvatar: string;
+  socketId: string;
+}
+
+// type Users = { [key: string]: User };
+
+interface Users {
+  users: User[];
+}
+
 interface Rooms {
   roomId: string;
   userId: string;
@@ -21,7 +33,8 @@ interface Rooms {
   roomParticipate: number;
 }
 
-let users: Users = {};
+let users: Users = { users: [] };
+
 const ROOM_COMMUNITY = "ROOM_COMMUNITY";
 // const rooms: Rooms[] = [];
 
@@ -57,8 +70,9 @@ export const createMessage = (type: string, message: any, sender: User) => ({
   sender,
 });
 
-const addUsers = (users: any, user: any) => {
-  users[user.nickName] = user;
+const addUsers = (users: Users, user: User) => {
+  //users[user.nickName] = user;
+  users.users.push(user);
   return users;
 };
 
@@ -79,14 +93,8 @@ function getRooms(io: Server) {
   return rooms;
 }
 
-interface User {
-  nickName: string;
-  userAvatar: string;
-  socketId: string;
-}
-type Users = { [key: string]: User };
 const isUser = (users: Users, nickName: string) => {
-  return nickName in users;
+  return users.users.some((v) => v.nickName === nickName);
 };
 
 io.on("connection", (socket) => {
