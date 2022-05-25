@@ -59,6 +59,9 @@ export function ChatContents({ messages, typingUser }: propTypes) {
     throttledScroll();
   }, [messages]);
 
+  console.log('====================[INFO] ChatContents=====================');
+  console.log(messages);
+
   return (
     <ChatContentStyled>
       <ChatContentWrapper ref={chatContainerRef}>

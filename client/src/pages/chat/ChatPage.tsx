@@ -33,9 +33,9 @@ const ChatPageStyled = styled.div`
 `;
 
 const SideMenuWrapper = styled.div`
-  width: 25%;
-  max-width: 200px;
-  min-width: 150px;
+  width: 30%;
+  max-width: 250px;
+  min-width: 220px;
 `;
 const ChatWrapper = styled.div`
   width: 100%;

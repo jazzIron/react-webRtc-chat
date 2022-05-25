@@ -6,6 +6,7 @@ import { ChatMessageInput } from './ChatMessageInput';
 import { ChatRoomHeader } from './ChatRoomHeader';
 import { useRecoilState } from 'recoil';
 import { usersState } from '@src/store/userState';
+import { activeChannelState, chatsState, Messages, PrivateRoomsState } from '@src/store/chatState';
 
 type MessageType = 'NEW_USER' | 'DEFAULT';
 
@@ -17,12 +18,29 @@ interface Message {
   sender: User;
 }
 
+interface PrivateRoom {
+  roomName: string;
+  description: string;
+  isTyping: boolean;
+  messages: Message[];
+  msgCount: number;
+  user: User;
+  type: string;
+}
+
+interface PrivateRooms {
+  rooms: PrivateRoom[];
+}
+
 export function Chat({ socket, user, logout, updateUsers }: any) {
   const [typingUser, setTypingUser] = useState(false);
   const [messageList, setMessageList] = useState<Message[]>([]);
   const [users, setUsers] = useRecoilState(usersState);
+  const [chats, setChats] = useRecoilState(activeChannelState);
+  const [privateRooms, setPrivateRooms] = useRecoilState(PrivateRoomsState);
 
   console.log(users);
+  console.log(privateRooms);
 
   useEffect(() => {
     console.log(
@@ -30,12 +48,24 @@ export function Chat({ socket, user, logout, updateUsers }: any) {
     );
     socket.current.on(
       'NEW_USER',
-      ({ newUser, users, message }: { newUser: User; users: Users; message: Message }) => {
+      ({
+        newUser,
+        users,
+        message,
+        privateRooms,
+      }: {
+        newUser: User;
+        users: Users;
+        message: Message;
+        privateRooms: PrivateRooms;
+      }) => {
         console.log('==================[INFO] NEW_USER================');
         console.log(newUser);
         console.log(users);
         console.log(message);
+        console.log(privateRooms);
         updateUsers(users);
+        setPrivateRooms(privateRooms);
         setUsers(users.users);
         setMessageList((prev) => {
           return [...prev, message];
@@ -63,6 +93,7 @@ export function Chat({ socket, user, logout, updateUsers }: any) {
 
   const sendTyping = (isTyping: boolean) => {
     console.log('================== [INFO] sendTyping==================');
+    console.log(chats);
     socket.current.emit('TYPING', { roomId: 'ROOM_COMMUNITY', isTyping });
   };
 

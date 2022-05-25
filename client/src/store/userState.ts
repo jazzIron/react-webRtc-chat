@@ -17,7 +17,7 @@ const initUser = {
 
 export const usersState = atom<User[]>({
   key: 'usersState',
-  default: initUsers,
+  default: [],
 });
 
 export const userState = atom<User>({

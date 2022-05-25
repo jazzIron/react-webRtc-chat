@@ -24,19 +24,33 @@ interface Users {
   users: User[];
 }
 
-interface Rooms {
-  roomId: string;
-  userId: string;
+interface Message {
+  id: string; // socket_id
+  message: string; // 메세지
+  sender: string; // 닉네임
+  time: Date | string; // 보낸시간
+}
+
+interface PrivateRoom {
   roomName: string;
-  roomPwd: string;
-  roomMax: number;
-  roomParticipate: number;
+  description: string;
+  isTyping: boolean;
+  messages: Message[];
+  msgCount: number;
+  user: User;
+  type: string;
+}
+
+interface PrivateRooms {
+  rooms: PrivateRoom[];
 }
 
 let users: Users = { users: [] };
 
 const ROOM_COMMUNITY = "ROOM_COMMUNITY";
 // const rooms: Rooms[] = [];
+
+let privateRooms: PrivateRooms = { rooms: [] };
 
 const rooms = io.of("/").adapter.rooms;
 const sids = io.of("/").adapter.sids;
@@ -51,6 +65,21 @@ const createUser = (user: User, socketId: string) => ({
   userAvatar: user.userAvatar,
   socketId,
 });
+
+const createPrivateRoom = (user: User, privateRooms: PrivateRooms) => {
+  console.log("====================createPrivateRoom=================");
+  const newPrivateRoom = {
+    roomName: `ROOM_${user.socketId}`,
+    user: user,
+    description: "direct message",
+    messages: [],
+    isTyping: false,
+    msgCount: 0,
+    type: "Private",
+  };
+
+  return privateRooms.rooms.push(newPrivateRoom);
+};
 
 const ChatTypingMessage = (type: string, message: string, sender: User) => {
   return {
@@ -79,7 +108,7 @@ const addUsers = (users: Users, user: User) => {
 function getActiveRooms(io: Server) {
   const arr = Array.from(io.sockets.adapter.rooms);
   const rooms = arr.filter((room: any) => !room[1].has(room[0]));
-  console.log(rooms);
+  //console.log(rooms);
   const activeRoom = rooms.map((i: any) => i[0]);
   return activeRoom;
 }
@@ -88,7 +117,7 @@ function getRooms(io: Server) {
   const adapter = io.sockets.adapter.rooms;
   const arr = Array.from(adapter);
 
-  console.log(arr);
+  //console.log(arr);
   const rooms = arr.filter((room: any) => !room[1].has(room[0]));
   return rooms;
 }
@@ -104,12 +133,20 @@ io.on("connection", (socket) => {
   });
 
   socket.on("LOGIN", (user, isUserCallback) => {
-    isUser(users, user.nickName)
-      ? isUserCallback({ isUser: true, user: null })
-      : isUserCallback({
-          isUser: false,
-          user: createUser(user, socket.id),
-        });
+    if (isUser(users, user.nickName)) {
+      return isUserCallback({ isUser: true, user: null });
+    } else {
+      const socketId = socket.id;
+      const newUser = {
+        ...user,
+        socketId: socket.id,
+      };
+      createPrivateRoom(newUser, privateRooms);
+      isUserCallback({
+        isUser: false,
+        user: createUser(user, socketId),
+      });
+    }
   });
 
   socket.on("INIT_ROOM", (user) => {
@@ -119,7 +156,16 @@ io.on("connection", (socket) => {
     socket.join(ROOM_COMMUNITY);
     const msg = `[알림] ${user.nickName}님이 방에 입장하셨습니다. 환영합니다.`;
     const message = ChatTypingMessage("NEW_USER", msg, user);
-    io.emit(SocketMsgType.NEW_USER, { newUser: user, users: users, message });
+
+    console.log(users);
+    console.log(privateRooms);
+
+    io.emit(SocketMsgType.NEW_USER, {
+      newUser: user,
+      users: users,
+      message,
+      privateRooms,
+    });
   });
 
   socket.on("MESSAGE_SEND", ({ roomId, type, msg }) => {
@@ -145,13 +191,13 @@ io.on("connection", (socket) => {
     // console.log(roomList);
     // console.log(activeRoom);
 
-    console.log(io.sockets.adapter.rooms);
-    console.log("=============================");
-    console.log(socket.rooms);
-    console.log("=============================");
+    // console.log(io.sockets.adapter.rooms);
+    // console.log("=============================");
+    // console.log(socket.rooms);
+    // console.log("=============================");
     const sockets = await io.in(socket.id).fetchSockets();
 
-    console.log(sockets);
+    // console.log(sockets);
 
     io.emit("ROOM_LIST", roomListCallback(rooms));
   });

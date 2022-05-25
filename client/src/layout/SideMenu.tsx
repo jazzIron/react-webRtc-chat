@@ -8,6 +8,7 @@ import { Badge, Avatar, Collapse } from 'antd';
 import { useMemo } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import './SideMenu.scss';
+import { activeChannelState, PrivateRoomsState } from '../store/chatState';
 
 const { Panel } = Collapse;
 
@@ -21,7 +22,13 @@ export function SideMenu() {
   const users = useRecoilValue(usersState);
   const loginUser = useRecoilValue(loginUserState);
   const [selectUser, setSelectUser] = useRecoilState(userState);
+  const [activeChannel, setActiveChannel] = useRecoilState(activeChannelState);
+  const [privateRooms, setPrivateRooms] = useRecoilState(PrivateRoomsState);
   const onSelectUser = (user: User) => {
+    console.log(privateRooms);
+
+    const activeRoom = privateRooms.rooms.filter((v) => console.log(v));
+
     setSelectUser(user);
   };
   const onlineUsers = usersFilter(users, loginUser);
@@ -39,7 +46,7 @@ export function SideMenu() {
           <AvatarInCircle>
             <Avatar
               shape="square"
-              size={50}
+              size={70}
               src={AVATAR_LIST[loginUser.userAvatar]}
               alt="User Avatar Icon"
             />
@@ -84,7 +91,9 @@ export function SideMenu() {
 
 const SideMenuStyled = styled.div`
   height: 100vh;
-  background: #fff;
+  height: 100vh;
+  background: #0051b8;
+  color: #fff;
 `;
 
 const UserWrapper = styled.div<{ active: boolean }>`
@@ -95,12 +104,12 @@ const UserWrapper = styled.div<{ active: boolean }>`
   ${(props) => {
     return props.active
       ? css`
-          background: #0051b8;
+          background: #000;
           color: #fff;
         `
       : css`
-          background: #fff;
-          color: #000;
+          background: #0051b8;
+          color: #fff;
         `;
   }}
   & span {
@@ -123,16 +132,19 @@ const LoginUserWrapper = styled.div`
 
 const AvatarWrapper = styled.div`
   display: flex;
-  background-color: red;
+  background-color: #000;
   width: 100px;
   height: 100px;
-  border-radius: 50px;
+  border-radius: 50%;
 `;
 
 const AvatarInCircle = styled.div`
   margin: auto;
-  background-color: blue;
-  width: 50px;
-  height: 50px;
-  border-radius: 25px;
+  background-color: #fff;
+  width: 95px;
+  height: 95px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
