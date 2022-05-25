@@ -1,25 +1,54 @@
 import { CaretRightOutlined } from '@ant-design/icons';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import { User } from '@src/@types/User_types';
+import { User, Users } from '@src/@types/User_types';
 import { AVATAR_LIST } from '@src/components/image/avatarList';
-import { usersState, userState } from '@src/store/userState';
+import { loginUserState, usersState, userState } from '@src/store/userState';
 import { Badge, Avatar, Collapse } from 'antd';
+import { useMemo } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import './SideMenu.scss';
 
 const { Panel } = Collapse;
 
+const usersFilter = (users: User[], loginUser: User) => {
+  console.log(users);
+  console.log(loginUser);
+  return users.filter((user) => user.socketId !== loginUser.socketId);
+};
+
 export function SideMenu() {
   const users = useRecoilValue(usersState);
+  const loginUser = useRecoilValue(loginUserState);
   const [selectUser, setSelectUser] = useRecoilState(userState);
   const onSelectUser = (user: User) => {
     setSelectUser(user);
   };
+  const onlineUsers = usersFilter(users, loginUser);
+
+  console.log('loginUser========================');
+  console.log(loginUser);
+  console.log(users);
+  console.log(onlineUsers);
 
   //TODO: LOGIN USER 분기 처리
   return (
     <SideMenuStyled>
+      <LoginUserWrapper>
+        <AvatarWrapper>
+          <AvatarInCircle>
+            <Avatar
+              shape="square"
+              size={50}
+              src={AVATAR_LIST[loginUser.userAvatar]}
+              alt="User Avatar Icon"
+            />
+          </AvatarInCircle>
+        </AvatarWrapper>
+
+        <p>{loginUser.nickName}</p>
+      </LoginUserWrapper>
+
       <Collapse
         bordered={false}
         ghost={true}
@@ -28,7 +57,7 @@ export function SideMenu() {
         expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
       >
         <Panel header="Online User" key="1" style={{ padding: '0px' }}>
-          {users.map((user) => {
+          {onlineUsers.map((user) => {
             const activeUser = user.socketId === selectUser.socketId ? true : false;
             return (
               <UserWrapper
@@ -81,4 +110,29 @@ const UserWrapper = styled.div<{ active: boolean }>`
   & p {
     font-size: 12px;
   }
+`;
+
+const LoginUserWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 24px;
+  gap: 8px;
+  background: #15184600;
+`;
+
+const AvatarWrapper = styled.div`
+  display: flex;
+  background-color: red;
+  width: 100px;
+  height: 100px;
+  border-radius: 50px;
+`;
+
+const AvatarInCircle = styled.div`
+  margin: auto;
+  background-color: blue;
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
 `;
