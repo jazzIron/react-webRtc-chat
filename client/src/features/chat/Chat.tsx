@@ -6,41 +6,16 @@ import { ChatMessageInput } from './ChatMessageInput';
 import { ChatRoomHeader } from './ChatRoomHeader';
 import { useRecoilState } from 'recoil';
 import { usersState } from '@src/store/userState';
-import { activeChannelState, chatsState, Messages, PrivateRoomsState } from '@src/store/chatState';
-
-type MessageType = 'NEW_USER' | 'DEFAULT';
-
-interface Message {
-  type: MessageType;
-  id: string;
-  time: Date;
-  message: string;
-  sender: User;
-}
-
-interface PrivateRoom {
-  roomName: string;
-  description: string;
-  isTyping: boolean;
-  messages: Message[];
-  msgCount: number;
-  user: User;
-  type: string;
-}
-
-interface PrivateRooms {
-  rooms: PrivateRoom[];
-}
+import { activeRoomState, PrivateRoomsState } from '@src/store/chatState';
+import { Message, PrivateRooms } from './Chat_types';
 
 export function Chat({ socket, user, logout, updateUsers }: any) {
   const [typingUser, setTypingUser] = useState(false);
   const [messageList, setMessageList] = useState<Message[]>([]);
   const [users, setUsers] = useRecoilState(usersState);
-  const [chats, setChats] = useRecoilState(activeChannelState);
+  const [chats, setChats] = useRecoilState(activeRoomState);
   const [privateRooms, setPrivateRooms] = useRecoilState(PrivateRoomsState);
-
-  console.log(users);
-  console.log(privateRooms);
+  const [activeRoom, setActiveRoom] = useRecoilState(activeRoomState);
 
   useEffect(() => {
     console.log(
@@ -78,7 +53,25 @@ export function Chat({ socket, user, logout, updateUsers }: any) {
     socket.current.emit('ROOM_LIST', (rooms: any) => {
       console.log(rooms);
     });
-  }, []);
+    socket.current.on('P_TYPING', addPrivateTyping);
+    socket.current.on(
+      'P_MESSAGE_SEND',
+      ({ roomId, message }: { roomId: string; message: Message }) => {
+        console.log('=======================addPrivateMessage============================');
+
+        // privateRooms.rooms.map((room) => {
+        //   if (room.user.socketId === roomId) {
+        //     room.messages.push(message);
+        //     if (activeRoom?.roomName !== `ROOM_${roomId}`) room.msgCount++;
+        //   }
+        //   return null;
+        // });
+
+        console.log(privateRooms);
+        setPrivateRooms(privateRooms);
+      },
+    );
+  }, [socket.current]);
 
   const addTyping = ({ isTyping, sender }: { isTyping: boolean; sender: string }) => {
     console.warn('=====================addTyping======================');
@@ -86,15 +79,37 @@ export function Chat({ socket, user, logout, updateUsers }: any) {
     setTypingUser(isTyping);
   };
 
+  const addPrivateTyping = ({ sender, isTyping }: { sender: string; isTyping: boolean }) => {
+    console.log('[INFO] addPTyping**************************');
+    privateRooms.rooms.map((rooms) => {
+      if (rooms.user.socketId === sender) {
+        rooms.isTyping = isTyping;
+      }
+      return null;
+    });
+    setPrivateRooms(privateRooms);
+  };
+
   const sendMsg = (msg: string) => {
     console.log('========================== [INFO] sendMsg ==========');
-    socket.current.emit('MESSAGE_SEND', { roomId: 'ROOM_COMMUNITY', type: 'BASIC', msg });
+
+    if (activeRoom?.type === 'Private') {
+      socket.current.emit('P_MESSAGE_SEND', { activeRoom, type: 'BASIC', msg });
+    } else {
+      socket.current.emit('MESSAGE_SEND', { roomId: 'ROOM_COMMUNITY', type: 'BASIC', msg });
+    }
   };
 
   const sendTyping = (isTyping: boolean) => {
     console.log('================== [INFO] sendTyping==================');
     console.log(chats);
-    socket.current.emit('TYPING', { roomId: 'ROOM_COMMUNITY', isTyping });
+    console.log(activeRoom);
+
+    if (activeRoom?.type === 'Private') {
+      socket.current.emit('P_TYPING', { activeRoom, isTyping });
+    } else {
+      socket.current.emit('TYPING', { roomId: 'ROOM_COMMUNITY', isTyping });
+    }
   };
 
   const addMessage = ({ roomId, message }: { roomId: string; message: Message }) => {
@@ -103,10 +118,27 @@ export function Chat({ socket, user, logout, updateUsers }: any) {
       return [...prev, message];
     });
   };
+
+  const addPrivateMessage = ({ roomId, message }: { roomId: string; message: Message }) => {
+    console.log('=======================addPrivateMessage============================');
+
+    privateRooms.rooms.map((room) => {
+      if (room.user.socketId === roomId) {
+        room.messages.push(message);
+        if (activeRoom?.roomName !== `ROOM_${roomId}`) room.msgCount++;
+      }
+      return null;
+    });
+
+    console.log(privateRooms);
+    setPrivateRooms(privateRooms);
+  };
+
   return (
     <>
       <ChatRoomHeader user={user} />
       <ChatStyled>
+        {/* <ChatContents messages={activeRoom?.messages} typingUser={typingUser} /> */}
         <ChatContents messages={messageList} typingUser={typingUser} />
         <ChatMessageInput sendMsg={sendMsg} sendTyping={sendTyping} />
       </ChatStyled>

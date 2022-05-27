@@ -6,19 +6,10 @@ import { throttle } from 'lodash';
 import moment from 'moment';
 import { useRef, useEffect, useMemo } from 'react';
 import { ChatTypingMessage } from './ChatMessageInput';
-
-type MessageType = 'NEW_USER' | 'DEFAULT';
-
-interface Message {
-  type: MessageType;
-  id: string;
-  time: Date;
-  message: string;
-  sender: User;
-}
+import { Message } from './Chat_types';
 
 interface propTypes {
-  messages: Message[];
+  messages: Message[] | undefined;
   typingUser: boolean;
 }
 

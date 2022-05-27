@@ -1,6 +1,4 @@
 import styled from '@emotion/styled';
-import { User } from '@src/@types/User_types';
-import { PChat } from '@src/features/chat';
 import useSocketIo from '@src/hooks/socketIo/useSocketIo';
 import { loginUserState } from '@src/store/userState';
 import { SocketMsgType } from '@src/utils/Constant';

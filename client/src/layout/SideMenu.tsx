@@ -5,10 +5,10 @@ import { User, Users } from '@src/@types/User_types';
 import { AVATAR_LIST } from '@src/components/image/avatarList';
 import { loginUserState, usersState, userState } from '@src/store/userState';
 import { Badge, Avatar, Collapse } from 'antd';
-import { useMemo } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import './SideMenu.scss';
-import { activeChannelState, PrivateRoomsState } from '../store/chatState';
+import { activeRoomState, PrivateRoomsState } from '../store/chatState';
+import { PrivateRooms } from '@src/features/chat';
 
 const { Panel } = Collapse;
 
@@ -18,17 +18,21 @@ const usersFilter = (users: User[], loginUser: User) => {
   return users.filter((user) => user.socketId !== loginUser.socketId);
 };
 
+const selectPrivateRoom = (privateRooms: PrivateRooms, user: User) => {
+  const selectActiveRoom = privateRooms.rooms.filter((v) => v.user.socketId === user.socketId);
+  return selectActiveRoom.length > 0 ? selectActiveRoom[0] : null;
+};
+
 export function SideMenu() {
   const users = useRecoilValue(usersState);
   const loginUser = useRecoilValue(loginUserState);
   const [selectUser, setSelectUser] = useRecoilState(userState);
-  const [activeChannel, setActiveChannel] = useRecoilState(activeChannelState);
+  const [activeRoom, setActiveRoom] = useRecoilState(activeRoomState);
   const [privateRooms, setPrivateRooms] = useRecoilState(PrivateRoomsState);
   const onSelectUser = (user: User) => {
     console.log(privateRooms);
-
-    const activeRoom = privateRooms.rooms.filter((v) => console.log(v));
-
+    const activeRoom = selectPrivateRoom(privateRooms, user);
+    setActiveRoom(activeRoom);
     setSelectUser(user);
   };
   const onlineUsers = usersFilter(users, loginUser);
@@ -37,8 +41,6 @@ export function SideMenu() {
   console.log(loginUser);
   console.log(users);
   console.log(onlineUsers);
-
-  //TODO: LOGIN USER 분기 처리
   return (
     <SideMenuStyled>
       <LoginUserWrapper>

@@ -1,4 +1,5 @@
 import console from "console";
+import events from "events";
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -174,6 +175,24 @@ io.on("connection", (socket) => {
     io.sockets.in(roomId).emit("MESSAGE_SEND", { roomId, message });
   });
 
+  socket.on("P_MESSAGE_SEND", ({ activeRoom, type, msg }) => {
+    console.log("P_MESSAGE_SEND");
+    console.log(activeRoom);
+    console.log(msg);
+
+    if (socket.data.user) {
+      const sender = socket.data.user;
+      const message = createMessage(type, msg, socket.data.user);
+      socket
+        .to(activeRoom.user.socketId)
+        .emit("P_MESSAGE_SEND", { channel: sender, message });
+      socket.emit("P_MESSAGE_SEND", {
+        roomId: activeRoom.user.socketId,
+        message,
+      });
+    }
+  });
+
   socket.on("TYPING", ({ roomId, isTyping }) => {
     console.log(`===============[INFO] TYPING===============`);
     console.log(roomId);
@@ -182,6 +201,12 @@ io.on("connection", (socket) => {
     socket.broadcast
       .to(roomId)
       .emit("TYPING", { roomId, isTyping, sender: socket.data.user });
+  });
+
+  socket.on("P_TYPING", ({ activeRoom, isTyping }) => {
+    console.log(`===============[INFO] P_TYPING===============`);
+    const sender = socket.data.user.socketId;
+    socket.to(activeRoom.user.socketId).emit("P_TYPING", { sender, isTyping });
   });
 
   socket.on("ROOM_LIST", async (roomListCallback) => {
@@ -196,38 +221,8 @@ io.on("connection", (socket) => {
     // console.log(socket.rooms);
     // console.log("=============================");
     const sockets = await io.in(socket.id).fetchSockets();
-
-    // console.log(sockets);
-
     io.emit("ROOM_LIST", roomListCallback(rooms));
   });
-
-  // socket.on(
-  //   "CREATE_ROOM",
-  //   ({ roomName, roomPwd, roomMax }, createRoomCallback) => {
-  //     if (duplicationCheckRoom(roomName))
-  //       return io.emit(
-  //         "CREATE_ROOM",
-  //         createRoomCallback({ status: false, rooms })
-  //       );
-  //     const roomId = socket.id;
-  //     rooms.push({
-  //       roomId: roomId,
-  //       userId: `USER_${Math.floor(Math.random() * 1000) + 1}`,
-  //       roomName,
-  //       roomPwd: roomPwd,
-  //       roomMax: roomMax,
-  //       roomParticipate: 1,
-  //     });
-  //     io.emit("CREATE_ROOM", createRoomCallback({ status: true, rooms }));
-  //   }
-  // );
-
-  // socket.on("JOIN_ROOM", (roomId: string, userId: string) => {
-  //   socket.join(roomId);
-  //   const userJoinThisRoom = rooms.filter((val) => val.userId !== userId);
-  //   io.sockets.to(roomId).emit("JOIN_ROOM", userJoinThisRoom);
-  // });
 });
 
 httpServer.listen(PORT, () => console.log("App was start at port : " + PORT));
