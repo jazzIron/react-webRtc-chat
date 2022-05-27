@@ -9,7 +9,7 @@ const TerserPlugin = require('terser-webpack-plugin'); // console.log 제거 옵
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin'); // ts-loader의 성능을 향상
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
-const svgToMiniDataURI = require('mini-svg-data-uri');
+// const svgToMiniDataURI = require('mini-svg-data-uri');
 
 module.exports = (env) => {
   const DOTEVN_PATH = `.env.${env.mode}`;
@@ -124,12 +124,12 @@ module.exports = (env) => {
         {
           test: /\.svg/,
           type: 'asset/inline',
-          generator: {
-            dataUrl: (content) => {
-              content = content.toString();
-              return svgToMiniDataURI(content);
-            },
-          },
+          // generator: {
+          //   dataUrl: (content) => {
+          //     content = content.toString();
+          //     return svgToMiniDataURI(content);
+          //   },
+          // },
         },
 
         {
@@ -203,6 +203,14 @@ module.exports = (env) => {
           },
         },
       }),
+      // new CopyWebpackPlugin({
+      //   patterns: [
+      //     {
+      //       from: path.join(path.dirname(require.resolve('pdfjs-dist/package.json')), 'cmaps'),
+      //       to: 'cmaps/',
+      //     },
+      //   ],
+      // }),
     ],
   };
 };

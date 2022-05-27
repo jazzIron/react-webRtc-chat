@@ -98,9 +98,9 @@ export const useWebRTC = (payload: propTypes) => {
     const init = async () => {
       try {
         await getLocalStream();
-        socketRef.emit('join_room', {
+        socket.current?.emit('join_room', {
           payload,
-          socketId: socket.id,
+          socketId: socket.current?.id,
         });
       } catch (error) {}
     };
@@ -112,7 +112,7 @@ export const useWebRTC = (payload: propTypes) => {
       try {
         const offer = await pcRef.current.createOffer(OFFER_OPTIONS);
         await pcRef.current.setLocalDescription(new RTCSessionDescription(offer));
-        socket.emit('offer', offer, socketId);
+        socket.current?.emit('offer', offer, socketId);
       } catch (error) {
         console.error(`[ERROR] createOffer : ${error}`);
       }
@@ -128,13 +128,13 @@ export const useWebRTC = (payload: propTypes) => {
         await streamRef.current.setRemoteDescription(new RTCSessionDescription(sdp));
         const answer = await streamRef.current.createAnswer(OFFER_OPTIONS);
         await streamRef.current.setLocalDescription(new RTCSessionDescription(answer));
-        socket.emit('answer', answer, socketId);
+        socket.current?.emit('answer', answer, socketId);
       } catch (e) {
         console.error(e);
       }
     };
 
-    socket.on('join', async (participantsInfo) => {
+    socket.current?.on('join', async (participantsInfo) => {
       try {
         participantsInfo.forEach(async (participant: any) => {
           if (!localVideoRef.current) return;
@@ -152,23 +152,23 @@ export const useWebRTC = (payload: propTypes) => {
       }
     });
 
-    socket.on('getOffer', async (sdp: RTCSessionDescription, userId, socketId) => {
+    socket.current?.on('getOffer', async (sdp: RTCSessionDescription, userId, socketId) => {
       await createAnswer(sdp, userId, socketId);
     });
 
-    socket.on('getAnswer', (sdp: RTCSessionDescription, socketId: string) => {
+    socket.current?.on('getAnswer', (sdp: RTCSessionDescription, socketId: string) => {
       const peerConnection = peerConnectionsRef.current[socketId];
       if (!peerConnection) return;
       streamRef.current.setRemoteDescription(new RTCSessionDescription(sdp));
     });
 
-    socket.on('getCandidate', async (candidate: RTCIceCandidateInit, data) => {
+    socket.current?.on('getCandidate', async (candidate: RTCIceCandidateInit, data) => {
       const peerConnection = peerConnectionsRef.current[data.candidateSendId];
       if (!peerConnection) return;
       await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
     });
 
-    socket.on('leave', async (socketId) => {
+    socket.current?.on('leave', async (socketId) => {
       peerConnectionsRef.current[socketId].close();
       peerConnectionsRef.current[socketId] = null;
       delete peerConnectionsRef.current[socketId];
