@@ -9,9 +9,10 @@ const TerserPlugin = require('terser-webpack-plugin'); // console.log 제거 옵
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin'); // ts-loader의 성능을 향상
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
+// const svgToMiniDataURI = require('mini-svg-data-uri');
 
 module.exports = (env) => {
-  const DOTENV_PATH = `.env.${env.mode}`;
+  const DOTEVN_PATH = `.env.${env.mode}`;
   const mode = env.mode !== 'development' ? 'production' : env.mode;
   const devtool = env.mode !== 'development' ? 'source-map' : 'inline-source-map';
   console.log(
@@ -38,8 +39,12 @@ module.exports = (env) => {
       static: {
         directory: path.join(__dirname, 'public'),
       },
+      client: {
+        progress: true,
+      },
       compress: true,
       port: 3000,
+      allowedHosts: 'auto',
       liveReload: true,
       hot: false,
       open: true,
@@ -104,17 +109,37 @@ module.exports = (env) => {
           ], // 순서 중요함, 뒤에서 부터 실행
         },
         {
-          test: /\.(png|jpe?g|gif|svg|ico)$/i,
-          loader: 'url-loader',
-          options: {
-            name: '[name].[ext]?[hash]', // hash 처리(캐시)
-            limit: 20000, // 2kb 최대
-          },
+          test: /\.(png|jpe?g|gif|ico)$/i,
+          use: [
+            {
+              loader: 'url-loader',
+              options: {
+                limit: 20000,
+                fallback: 'file-loader',
+                name: '[name].[ext]?[hash]',
+              },
+            },
+          ],
         },
         {
-          test: /\.(woff|woff2|ttf|otf)$/i,
+          test: /\.svg/,
           type: 'asset/inline',
+          // generator: {
+          //   dataUrl: (content) => {
+          //     content = content.toString();
+          //     return svgToMiniDataURI(content);
+          //   },
+          // },
         },
+
+        {
+          test: /\.(woff|woff2|eot|ttf|otf)$/i,
+          type: 'asset/resource',
+          generator: {
+            filename: 'assets/[name].[hash][ext]',
+          },
+        },
+
         {
           test: /\.txt/i,
           type: 'asset/source',
@@ -122,26 +147,25 @@ module.exports = (env) => {
       ],
     },
     plugins: [
-      // TODO: 환경구분 webpack5 env 사용 불가능
-      // NOTE: DefinePlugin webpack이 빌드하는 동안에만 사용됨
       new webpack.DefinePlugin({
         ENV_MODE: JSON.stringify(env.mode),
       }),
       new Dotenv({
-        path: DOTENV_PATH,
+        path: DOTEVN_PATH,
       }),
-      new webpack.BannerPlugin({
-        banner: `
-        Build Date: ${new Date().toLocaleString()}
-        Commit Version: ${childProcess.execSync('git rev-parse --short HEAD')},
-        Author: ${childProcess.execSync('git config user.name')}
-      `,
-      }),
+      // new webpack.BannerPlugin({
+      //   banner: `
+      //   Build Date: ${new Date().toLocaleString()}
+      //   Commit Version: ${childProcess.execSync('git rev-parse --short HEAD')},
+      //   Author: ${childProcess.execSync('git config user.name')}
+      // `,
+      // }),
       //css 파일과 js파일을 각각 html파일의 link태그, script태그로 추가
       new HtmlWebpackPlugin({
         template: './public/index.html',
         filename: './index.html',
         favicon: `./public/favicon.ico`,
+        hash: true,
         templateParameters: {
           env: env.mode === 'development' ? '(개발용)' : '',
         },
@@ -179,6 +203,14 @@ module.exports = (env) => {
           },
         },
       }),
+      // new CopyWebpackPlugin({
+      //   patterns: [
+      //     {
+      //       from: path.join(path.dirname(require.resolve('pdfjs-dist/package.json')), 'cmaps'),
+      //       to: 'cmaps/',
+      //     },
+      //   ],
+      // }),
     ],
   };
 };

@@ -8,6 +8,7 @@ export default function useSocketIo() {
 
   useEffect(() => {
     createNewSocket();
+    console.log(socketRef);
     return () => {
       if (socketRef.current && socketRef.current.connected) {
         socketRef.current.disconnect();
