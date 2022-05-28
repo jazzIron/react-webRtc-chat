@@ -7,4 +7,4 @@ export const PC_CONFIG: RTCConfiguration = {
   ],
 };
 
-export const SocketDomain = `http://${window.location.hostname}:8080`;
+export const SocketDomain = `ws://${window.location.hostname}:8081`;

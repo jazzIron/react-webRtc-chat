@@ -10,8 +10,12 @@ import {
   IOfferCare,
 } from "./type";
 
-const app = express();
+const cors = require("cors");
+const uuid = require("uuid");
 
+const PORT = process.env.PORT || 8081;
+const app = express();
+app.use(cors());
 const httpServer = createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });
 
@@ -140,6 +144,9 @@ io.on("connection", (socket) => {
       (userId) => userId !== socket.id
     );
 
+    console.log("join_room");
+    console.log(usersInThisRoom);
+
     io.sockets.to(socket.id).emit("all_users", usersInThisRoom);
   });
 
@@ -178,4 +185,17 @@ io.on("connection", (socket) => {
   });
 });
 
-httpServer.listen(8080);
+httpServer.listen(PORT, () => {
+  console.log(
+    "\x1b[33m%s\x1b[0m",
+    `*****************************************************************`
+  );
+  console.log(
+    "\x1b[33m%s\x1b[0m",
+    `                [SignalingServer START] : ${PORT}                 `
+  );
+  console.log(
+    "\x1b[33m%s\x1b[0m",
+    `*****************************************************************`
+  );
+});

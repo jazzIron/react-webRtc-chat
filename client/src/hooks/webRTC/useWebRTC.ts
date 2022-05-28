@@ -24,8 +24,9 @@ export const useLocalStream = () => {
   const getLocalStream = useCallback(async () => {
     try {
       //사용자에게 미디어 입력 장치 사용 권한을 요청
-      streamRef.current = await navigator.mediaDevices.getUserMedia(USER_MEDIA);
-      if (localVideoRef.current) localVideoRef.current.srcObject = streamRef.current;
+      const stream = await navigator.mediaDevices.getUserMedia(USER_MEDIA);
+      console.log(localVideoRef.current);
+      if (localVideoRef.current) localVideoRef.current.srcObject = stream as MediaStream;
       streamRef.current
         .getTracks()
         .forEach((track: MediaStreamTrack) => (track.enabled = !track.enabled));
@@ -88,7 +89,7 @@ export const useSetPeerConnection = (setParticipants: any, socket: any, streamRe
 export const useWebRTC = (payload: propTypes) => {
   const peerConnectionsRef = useRef<any>({});
   const [participants, setParticipants] = useState([]);
-  const { socket, socketRef } = useSocketIo();
+  const { socketRef: socket } = useSocketIo();
   const { streamRef, localVideoRef, getLocalStream } = useLocalStream();
   const { pcRef, setPeerConnection } = useSetPeerConnection(setParticipants, socket, streamRef);
 
@@ -98,9 +99,9 @@ export const useWebRTC = (payload: propTypes) => {
     const init = async () => {
       try {
         await getLocalStream();
+        console.log(socket.current);
         socket.current?.emit('join_room', {
-          payload,
-          socketId: socket.current?.id,
+          roomId: socket.current?.id,
         });
       } catch (error) {}
     };

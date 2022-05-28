@@ -19,8 +19,12 @@ export default function useSocketIo() {
 
   const createNewSocket = async () => {
     socketRef.current = io(SOCKET_DOMAIN!, { transports: ['websocket'] });
-    socketRef.current.on('connnection', () => {
+    socketRef.current.on('connection', () => {
       console.log('connected to server');
+    });
+
+    socketRef.current.on('all_users', () => {
+      console.log('all_users');
     });
 
     socketRef.current.on('disconnect', () => {
@@ -34,7 +38,7 @@ export default function useSocketIo() {
 
   return {
     socketRef,
-    socket: socketRef,
+    socket: socketRef.current,
     createNewSocket,
   };
 }

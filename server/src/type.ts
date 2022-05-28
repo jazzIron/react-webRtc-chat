@@ -16,14 +16,14 @@ export interface IPatient {
   id: string;
   socketId: string;
   name: string;
-  status?: 'waiting' | 'requested' | 'caring';
+  status?: "waiting" | "requested" | "caring";
 }
 
 export interface IDoctor {
   id: string;
   socketId: string;
   name: string;
-  status?: 'waiting' | 'requested' | 'caring';
+  status?: "waiting" | "requested" | "caring";
 }
 
 export interface IRequested {

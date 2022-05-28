@@ -5,7 +5,8 @@
   "main": "src/app.ts",
   "dependencies": {
     "express": "^4.17.1",
-    "socket.io": "^4.3.2",
+    "socket.io": "^4.5.1",
+    "socket.io-client": "^4.5.1",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
@@ -18,8 +19,8 @@
   },
   "scripts": {
     "start": "nodemon --exec ./node_modules/.bin/ts-node ./src/room.ts",
-    "rtc": "nodemon --exec ./node_modules/.bin/ts-node ./src/test.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "nodemon --exec ./node_modules/.bin/ts-node ./src/webRtc.ts",
+    "rtc": "nodemon --exec ./node_modules/.bin/ts-node ./src/signalingServer/signalingServer.ts"
   },
   "author": "",
   "license": "ISC"
