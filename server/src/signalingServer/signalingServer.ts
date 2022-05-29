@@ -1,7 +1,7 @@
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { IRooms, SocketRoom } from "../type";
+import { IOfferCare, IRooms, SocketRoom } from "../type";
 
 const cors = require("cors");
 const uuid = require("uuid");
@@ -32,7 +32,8 @@ io.on("connection", (socket) => {
   socket.on("JOIN_ROOM", (roomId: string) => {
     // 기존의 룸 나가기
     console.log("JOIN_ROOM");
-    socket.leave(socket.id);
+    console.log(socket.id);
+    //socket.leave(socket.id);
     socket.join(roomId);
 
     if (rooms[roomId]) {
@@ -50,19 +51,21 @@ io.on("connection", (socket) => {
     const usersInThisRoom = rooms[roomId].filter(
       (userId) => userId !== socket.id
     );
-    io.emit("ALL_USERS", usersInThisRoom);
+    io.sockets.to(socket.id).emit("ALL_USERS", usersInThisRoom);
   });
 
   socket.on("CANDIDATE", (candidate) => {
-    io.emit("CANDIDATE", candidate);
+    socket.broadcast.emit("CANDIDATE", candidate);
   });
 
   socket.on("OFFER", (sdp) => {
-    io.emit("OFFER", sdp);
+    console.log("[INFO] OFFER ==================");
+    socket.broadcast.emit("OFFER", sdp);
   });
 
   socket.on("ANSWER", (sdp) => {
-    io.emit("ANSWER", sdp);
+    console.log("[INFO] ANSWER ==================");
+    socket.broadcast.emit("ANSWER", sdp);
   });
 
   socket.on("DISCONNECT", () => {

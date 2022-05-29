@@ -192,7 +192,7 @@ httpServer.listen(PORT, () => {
   );
   console.log(
     "\x1b[33m%s\x1b[0m",
-    `                [SignalingServer START] : ${PORT}                 `
+    `                [WebRtc START] : ${PORT}                 `
   );
   console.log(
     "\x1b[33m%s\x1b[0m",

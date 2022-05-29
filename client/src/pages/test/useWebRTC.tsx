@@ -73,12 +73,13 @@ export function useWebRTC() {
     });
 
     socket.on('OFFER', async (sdp: RTCSessionDescription) => {
-      console.log('OFFER');
+      console.log('[INFO] OFFER================');
+      console.log(sdp);
       createAnswer(sdp);
     });
 
     socket.on('ANSWER', (sdp: RTCSessionDescription) => {
-      console.log('ANSWER');
+      console.log('[INFO] ANSWER================');
       if (!pcRef.current) return;
       pcRef.current.setRemoteDescription(new RTCSessionDescription(sdp));
     });
@@ -87,7 +88,6 @@ export function useWebRTC() {
   const useLocalStream = async (roomId: string) => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia(USER_MEDIA);
-      console.log(localVideoRef);
       if (localVideoRef.current) localVideoRef.current.srcObject = stream;
       if (!(pcRef.current && socketRef.current)) throw new Error('[ERROR] useLocalStream handler');
 
@@ -121,8 +121,6 @@ export function useWebRTC() {
       };
 
       pcRef.current.ontrack = (event) => {
-        console.log('CHECK');
-        console.log(remoteVideoRef);
         if (remoteVideoRef.current) {
           // 비디오 스트림요소 연결
           remoteVideoRef.current.srcObject = event.streams[0];
@@ -153,12 +151,13 @@ export function useWebRTC() {
 
   // Caller에게 보낼 SDP 생성
   const createAnswer = async (sdp: RTCSessionDescription) => {
+    console.log('[INFO] createAnswer =======================');
     if (!(pcRef.current && socketRef.current)) return;
     try {
       await pcRef.current.setRemoteDescription(new RTCSessionDescription(sdp));
-      const mySdp = await pcRef.current.createAnswer(OFFER_OPTIONS);
-      await pcRef.current.setLocalDescription(new RTCSessionDescription(mySdp));
-      socketRef.current.emit('ANSWER', mySdp);
+      const answer = await pcRef.current.createAnswer(OFFER_OPTIONS);
+      await pcRef.current.setLocalDescription(new RTCSessionDescription(answer));
+      socketRef.current.emit('ANSWER', answer);
     } catch (error) {
       console.error(`[ERROR] createAnswer : ${error}`);
     }
