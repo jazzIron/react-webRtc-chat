@@ -1,9 +1,17 @@
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { SocketMsgType } from "./chat/Constant";
+import {
+  createPrivateRoom,
+  ChatTypingMessage,
+  isUser,
+  createUser,
+  addUsers,
+  createMessage,
+} from "./chatUtils";
+import { Users, PrivateRooms } from "./Chat_types";
+import { SocketMsgType } from "./Constant";
 const cors = require("cors");
-const uuid = require("uuid");
 
 const PORT = process.env.PORT || 8081;
 const app = express();
@@ -11,119 +19,11 @@ app.use(cors());
 const httpServer = createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });
 
-interface User {
-  nickName: string;
-  userAvatar: string;
-  socketId: string;
-}
-
-// type Users = { [key: string]: User };
-
-interface Users {
-  users: User[];
-}
-
-interface Message {
-  id: string; // socket_id
-  message: string; // 메세지
-  sender: string; // 닉네임
-  time: Date | string; // 보낸시간
-}
-
-interface PrivateRoom {
-  roomName: string;
-  description: string;
-  isTyping: boolean;
-  messages: Message[];
-  msgCount: number;
-  user: User;
-  type: string;
-}
-
-interface PrivateRooms {
-  rooms: PrivateRoom[];
-}
-
+const ROOM_COMMUNITY = "ROOM_COMMUNITY";
+let privateRooms: PrivateRooms = { rooms: [] };
 let users: Users = { users: [] };
 
-const ROOM_COMMUNITY = "ROOM_COMMUNITY";
-// const rooms: Rooms[] = [];
-
-let privateRooms: PrivateRooms = { rooms: [] };
-
 const rooms = io.of("/").adapter.rooms;
-const sids = io.of("/").adapter.sids;
-
-// const duplicationCheckRoom = (roomName: string) => {
-//   return rooms.some((val) => val.roomName === roomName);
-// };
-
-// 유저생성
-const createUser = (user: User, socketId: string) => ({
-  nickName: user.nickName,
-  userAvatar: user.userAvatar,
-  socketId,
-});
-
-const createPrivateRoom = (user: User, privateRooms: PrivateRooms) => {
-  console.log("====================createPrivateRoom=================");
-  const newPrivateRoom = {
-    roomName: `ROOM_${user.socketId}`,
-    user: user,
-    description: "direct message",
-    messages: [],
-    isTyping: false,
-    msgCount: 0,
-    type: "Private",
-  };
-
-  return privateRooms.rooms.push(newPrivateRoom);
-};
-
-const ChatTypingMessage = (type: string, message: string, sender: User) => {
-  return {
-    type,
-    id: uuid.v4(),
-    time: new Date(Date.now()),
-    message,
-    sender,
-  };
-};
-
-export const createMessage = (type: string, message: any, sender: User) => ({
-  type,
-  id: uuid.v4(),
-  time: new Date(Date.now()),
-  message,
-  sender,
-});
-
-const addUsers = (users: Users, user: User) => {
-  //users[user.nickName] = user;
-  users.users.push(user);
-  return users;
-};
-
-function getActiveRooms(io: Server) {
-  const arr = Array.from(io.sockets.adapter.rooms);
-  const rooms = arr.filter((room: any) => !room[1].has(room[0]));
-  //console.log(rooms);
-  const activeRoom = rooms.map((i: any) => i[0]);
-  return activeRoom;
-}
-
-function getRooms(io: Server) {
-  const adapter = io.sockets.adapter.rooms;
-  const arr = Array.from(adapter);
-
-  //console.log(arr);
-  const rooms = arr.filter((room: any) => !room[1].has(room[0]));
-  return rooms;
-}
-
-const isUser = (users: Users, nickName: string) => {
-  return users.users.some((v) => v.nickName === nickName);
-};
 
 io.on("connection", (socket) => {
   //시작시 방생성하기
@@ -209,16 +109,6 @@ io.on("connection", (socket) => {
 
   socket.on("ROOM_LIST", async (roomListCallback) => {
     console.log(`===============[INFO] ROOM_LIST===============`);
-    // const roomList = getRooms(io);
-    // const activeRoom = getActiveRooms(io);
-    // console.log(roomList);
-    // console.log(activeRoom);
-
-    // console.log(io.sockets.adapter.rooms);
-    // console.log("=============================");
-    // console.log(socket.rooms);
-    // console.log("=============================");
-    const sockets = await io.in(socket.id).fetchSockets();
     io.emit("ROOM_LIST", roomListCallback(rooms));
   });
 });

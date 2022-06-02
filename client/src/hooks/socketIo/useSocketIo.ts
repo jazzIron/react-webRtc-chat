@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 
-export const SOCKET_DOMAIN = `ws://${window.location.hostname}:8081`;
+export const SOCKET_DOMAIN = `ws://${window.location.hostname}:8081/chat`;
 
 export default function useSocketIo() {
   const socketRef = useRef<Socket>();

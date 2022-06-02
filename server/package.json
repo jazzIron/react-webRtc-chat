@@ -18,8 +18,7 @@
     "typescript": "^4.5.2"
   },
   "scripts": {
-    "start": "nodemon --exec ./node_modules/.bin/ts-node ./src/room.ts",
-    "test": "nodemon --exec ./node_modules/.bin/ts-node ./src/webRtc.ts",
+    "start": "nodemon --exec ./node_modules/.bin/ts-node ./src/chat/room.ts",
     "rtc": "nodemon --exec ./node_modules/.bin/ts-node ./src/signalingServer/signalingServer.ts"
   },
   "author": "",

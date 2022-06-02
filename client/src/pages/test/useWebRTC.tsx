@@ -16,11 +16,19 @@ const OFFER_OPTIONS = {
   offerToReceiveAudio: true,
 };
 
+const DATA_CHANNEL_OPTIONS = {
+  ordered: false, // 순서 보장 안함
+  maxRetransmitTime: 3000, // 밀리초 단위
+};
+
+const DATA_CHANNEL_NAME = 'CHAT_CHANNEL';
+
 export function useWebRTC() {
   const socketRef = useRef<Socket>();
   const localVideoRef = useRef<HTMLVideoElement>(null); // 본인 Media
   const remoteVideoRef = useRef<HTMLVideoElement>(null); // 상대방 Media
   const pcRef = useRef<RTCPeerConnection>(); //사용자 sessionDescription 생성
+  const dataChannelRef = useRef<RTCDataChannel>();
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
@@ -35,11 +43,28 @@ export function useWebRTC() {
   const createNewConnection = async () => {
     socketRef.current = io(SocketDomain!);
     pcRef.current = new RTCPeerConnection(PC_CONFIG);
+
     const socket = socketRef.current;
-
     console.log(socket);
-
     console.log(socket.connect().connected);
+
+    dataChannelRef.current = pcRef.current.createDataChannel(
+      DATA_CHANNEL_NAME,
+      DATA_CHANNEL_OPTIONS,
+    );
+
+    const dataChannel = dataChannelRef.current;
+    dataChannel.onopen = function () {
+      console.log('[INFO] DATA_CHANNEL===============');
+      dataChannel.send('Hello World!');
+    };
+    dataChannel.onmessage = function (event) {
+      console.log('Got Data Channel Message:', event.data);
+    };
+
+    dataChannel.onclose = function () {
+      console.log('The Data Channel is Closed');
+    };
 
     socket.on('connection', () => {
       console.log('connected to server');
@@ -163,5 +188,5 @@ export function useWebRTC() {
     }
   };
 
-  return { connected, socketRef, localVideoRef, remoteVideoRef, useLocalStream };
+  return { connected, dataChannelRef, socketRef, localVideoRef, remoteVideoRef, useLocalStream };
 }

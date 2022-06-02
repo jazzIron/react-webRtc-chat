@@ -1,7 +1,7 @@
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { IOfferCare, IRooms, SocketRoom } from "../type";
+import { IRooms, SocketRoom } from "./SignalingServer_types";
 
 const cors = require("cors");
 const uuid = require("uuid");
@@ -30,10 +30,8 @@ const hasParticipationRoom = (
 
 io.on("connection", (socket) => {
   socket.on("JOIN_ROOM", (roomId: string) => {
-    // 기존의 룸 나가기
     console.log("JOIN_ROOM");
     console.log(socket.id);
-    //socket.leave(socket.id);
     socket.join(roomId);
 
     if (rooms[roomId]) {
@@ -68,7 +66,7 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("ANSWER", sdp);
   });
 
-  socket.on("DISCONNECT", () => {
+  socket.on("disconnect", () => {
     const roomId = socketToRoom[socket.id];
     let room = rooms[roomId];
     if (room) {
