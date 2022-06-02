@@ -24,14 +24,30 @@ let privateRooms: PrivateRooms = { rooms: [] };
 let users: Users = { users: [] };
 
 const rooms = io.of("/").adapter.rooms;
+const chat = io.of("/chat").adapter.rooms;
 
 io.on("connection", (socket) => {
-  //시작시 방생성하기
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
+  console.log(`==============connection================`);
+  console.log(socket.rooms); // Set { <socket.id> }
+
+  socket.on("disconnect", (reason) => {
+    console.error("[ERROR] socket disconnected");
+    console.log(reason);
   });
 
+  socket.on("disconnecting", (reason) => {
+    console.error("[ERROR] socket disconnecting");
+    console.log(reason);
+    for (const room of socket.rooms) {
+      if (room !== socket.id) {
+        socket.to(room).emit("user has left", socket.id);
+      }
+    }
+  });
+
+  //시작시 방생성하기
   socket.on("LOGIN", (user, isUserCallback) => {
+    console.log("======================Login============");
     if (isUser(users, user.nickName)) {
       return isUserCallback({ isUser: true, user: null });
     } else {

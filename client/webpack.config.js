@@ -90,7 +90,13 @@ module.exports = (env) => {
           test: /\.(ts|tsx)$/,
           exclude: /node_modules/,
           use: [
-            'babel-loader',
+            {
+              loader: 'babel-loader',
+              options: {
+                presets: ['@babel/preset-env'], // ensure compatibility with older browsers
+                plugins: ['@babel/plugin-transform-object-assign'], // ensure compatibility with IE 11
+              },
+            },
             {
               loader: 'ts-loader',
               options: {

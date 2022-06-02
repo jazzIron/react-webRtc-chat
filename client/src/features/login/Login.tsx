@@ -2,17 +2,17 @@ import styled from '@emotion/styled';
 import { UserData, User } from '@src/@types/User_types';
 import { AVATAR_LIST } from '@src/components/image/avatarList';
 import { loginUserState } from '@src/store/userState';
-import { Avatar, Button, Form, Input, message, Select, Typography, Image, Space } from 'antd';
-const { Text, Title } = Typography;
-import { MutableRefObject, useEffect, useState } from 'react';
+import { Avatar, Button, Form, Input, message, Select, Typography, Image } from 'antd';
+const { Title } = Typography;
+import { useState, useEffect } from 'react';
 import { useRecoilState } from 'recoil';
-import { Socket } from 'socket.io-client';
 import loginBannerImg from '../../asset/images/Chat_Flatline_b.svg';
+import { loginSubmit } from './../../pages/test/socket';
+import { isEmpty } from 'lodash';
+import { useNavigate } from 'react-router-dom';
+import { RouteList } from '@src/routes/RouteList';
 
 const { Option } = Select;
-interface propTypes {
-  socket?: MutableRefObject<Socket | undefined>;
-}
 
 interface isUserCallback {
   user: {
@@ -23,17 +23,22 @@ interface isUserCallback {
   isUser: boolean;
 }
 
-export function Login({ socket }: propTypes) {
+export function Login() {
+  const navigate = useNavigate();
   const [form] = Form.useForm();
   const [userData, setUserData] = useState<UserData>({
     nickName: `USER_${Math.floor(Math.random() * 1000) + 1}`,
     userAvatar: 'captainAmerica01',
     error: false,
   });
-
   const [loginUser, setLoginUser] = useRecoilState(loginUserState);
 
+  useEffect(() => {
+    if (!isEmpty(loginUser.socketId)) navigate(RouteList.CHAT);
+  }, [loginUser]);
+
   const loginSuccess = (user: User) => {
+    console.log('[INFO] loginSuccess ');
     setUserData((prev) => {
       return {
         ...prev,
@@ -68,29 +73,18 @@ export function Login({ socket }: propTypes) {
     });
   };
 
-  const handleClickLoginSubmit = async () => {
-    if (!socket) return false;
-    if (!socket.current) return false;
-    try {
-      const values = await form.validateFields();
-      console.log('Success:', values);
-      socket.current.emit(
-        'LOGIN',
-        { nickName: userData.nickName, userAvatar: userData.userAvatar },
-        isUserCallback,
-      );
-    } catch (errorInfo) {
-      console.log('Failed:', errorInfo);
-    }
-  };
-
   const handleChangeAvatar = () => {
     setUserData((prev) => {
       return {
         ...prev,
-        userAvatar: form.getFieldValue('useAvatar'),
+        userAvatar: form.getFieldValue('userAvatar'),
       };
     });
+  };
+
+  const handleClickLoginSubmit = async () => {
+    const values = await form.validateFields();
+    loginSubmit(values, isUserCallback);
   };
 
   return (
@@ -110,7 +104,7 @@ export function Login({ socket }: propTypes) {
           autoComplete="off"
           initialValues={{
             nickName: `USER_${Math.floor(Math.random() * 1000) + 1}`,
-            useAvatar: userData.userAvatar,
+            userAvatar: userData.userAvatar,
           }}
         >
           <AvatarWrapper>
@@ -129,7 +123,7 @@ export function Login({ socket }: propTypes) {
             </AvatarStyled>
 
             <Form.Item
-              name="useAvatar"
+              name="userAvatar"
               label="아바타"
               hasFeedback
               rules={[

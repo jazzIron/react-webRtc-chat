@@ -45,7 +45,7 @@ export function MainPage() {
     return <ChatPage socket={socketRef} user={loginUser} logout={logout} />;
   return (
     <MainPageStyled>
-      <LoginPage socket={socketRef} />
+      <LoginPage />
     </MainPageStyled>
   );
 }

@@ -19,7 +19,8 @@
   },
   "scripts": {
     "start": "nodemon --exec ./node_modules/.bin/ts-node ./src/chat/room.ts",
-    "rtc": "nodemon --exec ./node_modules/.bin/ts-node ./src/signalingServer/signalingServer.ts"
+    "rtc": "nodemon --exec ./node_modules/.bin/ts-node ./src/signalingServer/signalingServer.ts",
+    "test": "nodemon --exec ./node_modules/.bin/ts-node ./src/socketIo/socketIo.ts"
   },
   "author": "",
   "license": "ISC"
